@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "node:fs";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -28,6 +29,10 @@ import AnalyticsEvent from "./models/AnalyticsEvent.js";
 import Donation from "./models/Donation.js";
 
 const app = express();
+const apiLandingPageTemplate = fs.readFileSync(
+  path.join(process.cwd(), "templates", "api-landing.html"),
+  "utf8",
+);
 
 app.use(
   helmet({
@@ -39,7 +44,8 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:"],
       },
@@ -149,6 +155,14 @@ for (const routeDef of apiRouteDefinitions) {
 }
 
 setupSwagger(app, apiRouteDefinitions);
+
+app.get("/", (req, res) => {
+  const clientUrl = config.CLIENT_URL || "http://localhost:3000";
+
+  res
+    .type("html")
+    .send(apiLandingPageTemplate.replaceAll("__CLIENT_URL__", clientUrl));
+});
 
 /**
  * @swagger

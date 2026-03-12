@@ -7,7 +7,7 @@ const jwtExpiresIn = process.env.JWT_EXPIRES_IN || process.env.JWT_EXPIRES;
 
 const config = {
   NODE_ENV: process.env.NODE_ENV || "development",
-  PORT: process.env.PORT || 5002,
+  PORT: process.env.PORT || 5000,
   MONGODB_URI: process.env.MONGODB_URI,
   JWT_SECRET:
     jwtSecret ||
@@ -19,6 +19,8 @@ const config = {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   CLIENT_URL: process.env.CLIENT_URL || "http://localhost:3000",
   SESSION_SECRET: process.env.SESSION_SECRET || null,
+  SWAGGER_USERNAME: process.env.SWAGGER_USERNAME || "",
+  SWAGGER_PASSWORD: process.env.SWAGGER_PASSWORD || "",
   // Enhanced Security
   COOKIE_DOMAIN: process.env.COOKIE_DOMAIN,
   PASSWORD_MIN_LENGTH: parseInt(process.env.PASSWORD_MIN_LENGTH) || 8,
