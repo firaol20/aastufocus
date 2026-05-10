@@ -1,9 +1,8 @@
-import User from '../models/User.js';
+import prisma from '../utils/prisma.js';
 import { verifyToken } from '../utils/jwtUtils.js';
 
 // Security enhancement for auth endpoints
 export const addSecurityHeaders = (req, res, next) => {
-  // Add additional security headers
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -34,7 +33,16 @@ export const verifyJWT = async (req, res, next) => {
 
     const decoded = verifyToken(token);
 
-    const user = await User.findById(decoded.userId).select('-password');
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: {
+        id: true, name: true, email: true, role: true,
+        avatar: true, department: true, yearOfStudy: true,
+        phone: true, isActive: true, isVerified: true,
+        passwordChangedAt: true, createdAt: true, updatedAt: true
+      }
+    });
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -49,17 +57,20 @@ export const verifyJWT = async (req, res, next) => {
       });
     }
 
-    if (user.changedPasswordAfter(decoded.iat)) {
-      return res.status(401).json({
-        success: false,
-        message: 'User recently changed password. Please log in again.'
-      });
+    // Check if password was changed after the token was issued
+    if (user.passwordChangedAt) {
+      const changedTimestamp = parseInt(user.passwordChangedAt.getTime() / 1000, 10);
+      if (decoded.iat < changedTimestamp) {
+        return res.status(401).json({
+          success: false,
+          message: 'User recently changed password. Please log in again.'
+        });
+      }
     }
 
     req.user = user;
     next();
   } catch (error) {
-    // Enhanced error logging
     console.error('JWT verification error:', error);
     return res.status(401).json({
       success: false,
@@ -112,7 +123,10 @@ export const optionalAuth = async (req, res, next) => {
 
     if (token) {
       const decoded = verifyToken(token);
-      const user = await User.findById(decoded.userId).select('-password');
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: { id: true, name: true, email: true, role: true, avatar: true, isActive: true, isVerified: true }
+      });
       if (user && user.isActive) {
         req.user = user;
       }

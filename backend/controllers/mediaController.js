@@ -1,137 +1,55 @@
-import Media from '../models/Media.js';
 import { AppError, asyncHandler } from '../middleware/errorsHandler.js';
-import { ImageProcessor } from '../utils/imageProcessor.js';
+import prisma from '../utils/prisma.js';
 import path from 'path';
 import fs from 'fs/promises';
 
 // Upload single media file
 export const uploadMedia = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    throw new AppError('No file uploaded', 400);
-  }
+  if (!req.file) throw new AppError('No file uploaded', 400);
 
-  const {
-    category = 'other',
-    tags = [],
-    altText,
-    description,
-    isPublic = true,
-    isFeatured = false
-  } = req.body;
+  const { tags = [], title } = req.body;
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
-  // Determine media type from mimetype
   let mediaType = 'document';
   if (req.file.mimetype.startsWith('image/')) mediaType = 'image';
   else if (req.file.mimetype.startsWith('video/')) mediaType = 'video';
   else if (req.file.mimetype.startsWith('audio/')) mediaType = 'audio';
 
-  // Generate file URL
-  const baseUrl = `${req.protocol}://${req.get('host')}`;
-  const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
-
-  // Process image if it's an image file
-  let thumbnailUrl = null;
-  let dimensions = null;
-
-  if (mediaType === 'image') {
-    // Get image dimensions
-    dimensions = await ImageProcessor.getImageDimensions(req.file.path);
-    
-    // Generate thumbnail
-    const thumbnailDir = path.join(process.cwd(), 'uploads', 'thumbnails');
-    await fs.mkdir(thumbnailDir, { recursive: true });
-    
-    const thumbnailPath = path.join(thumbnailDir, `thumb_${req.file.filename}`);
-    await ImageProcessor.generateThumbnail(req.file.path, thumbnailPath);
-    
-    thumbnailUrl = `${baseUrl}/uploads/thumbnails/thumb_${req.file.filename}`;
-  }
-
-  // Create media record
-  const media = await Media.create({
-    filename: req.file.filename,
-    originalName: req.file.originalname,
-    mimeType: req.file.mimetype,
-    size: req.file.size,
-    path: req.file.path,
-    url: fileUrl,
-    thumbnailUrl,
-    type: mediaType,
-    category,
-    tags: tags.length > 0 ? tags.split(',').map(tag => tag.trim()) : [],
-    altText,
-    description,
-    uploadedBy: req.user._id,
-    isPublic,
-    isFeatured,
-    dimensions
+  const media = await prisma.media.create({
+    data: {
+      url: fileUrl,
+      type: mediaType,
+      title: title || req.file.originalname,
+      tags: Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(Boolean)
+    }
   });
 
-  res.status(201).json({
-    success: true,
-    message: 'Media uploaded successfully',
-    data: media
-  });
+  res.status(201).json({ success: true, message: 'Media uploaded successfully', data: media });
 });
 
 // Upload multiple media files
 export const uploadMultipleMedia = asyncHandler(async (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    throw new AppError('No files uploaded', 400);
-  }
+  if (!req.files || req.files.length === 0) throw new AppError('No files uploaded', 400);
 
-  const {
-    category = 'other',
-    tags = [],
-    isPublic = true
-  } = req.body;
-
+  const { tags = [] } = req.body;
   const baseUrl = `${req.protocol}://${req.get('host')}`;
   const uploadedMedia = [];
 
   for (const file of req.files) {
-    // Determine media type
     let mediaType = 'document';
     if (file.mimetype.startsWith('image/')) mediaType = 'image';
     else if (file.mimetype.startsWith('video/')) mediaType = 'video';
     else if (file.mimetype.startsWith('audio/')) mediaType = 'audio';
 
-    // Generate file URL
-    const fileUrl = `${baseUrl}/uploads/${file.filename}`;
-
-    // Process image if needed
-    let thumbnailUrl = null;
-    let dimensions = null;
-
-    if (mediaType === 'image') {
-      dimensions = await ImageProcessor.getImageDimensions(file.path);
-      
-      const thumbnailDir = path.join(process.cwd(), 'uploads', 'thumbnails');
-      await fs.mkdir(thumbnailDir, { recursive: true });
-      
-      const thumbnailPath = path.join(thumbnailDir, `thumb_${file.filename}`);
-      await ImageProcessor.generateThumbnail(file.path, thumbnailPath);
-      
-      thumbnailUrl = `${baseUrl}/uploads/thumbnails/thumb_${file.filename}`;
-    }
-
-    // Create media record
-    const media = await Media.create({
-      filename: file.filename,
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-      size: file.size,
-      path: file.path,
-      url: fileUrl,
-      thumbnailUrl,
-      type: mediaType,
-      category,
-      tags: tags.length > 0 ? tags.split(',').map(tag => tag.trim()) : [],
-      uploadedBy: req.user._id,
-      isPublic,
-      dimensions
+    const media = await prisma.media.create({
+      data: {
+        url: `${baseUrl}/uploads/${file.filename}`,
+        type: mediaType,
+        title: file.originalname,
+        tags: Array.isArray(tags) ? tags : []
+      }
     });
-
     uploadedMedia.push(media);
   }
 
@@ -142,72 +60,36 @@ export const uploadMultipleMedia = asyncHandler(async (req, res) => {
   });
 });
 
-// Get all media with filtering and pagination
+// Get all media
 export const getAllMedia = asyncHandler(async (req, res) => {
-  const {
-    type,
-    category,
-    uploadedBy,
-    tags,
-    search,
-    isPublic,
-    isFeatured,
-    page = 1,
-    limit = 20,
-    sortBy = 'createdAt',
-    sortOrder = 'desc'
-  } = req.query;
+  const { type, search, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
 
-  // Build filter object
-  const filter = {};
-  
-  if (type) filter.type = type;
-  if (category) filter.category = category;
-  if (uploadedBy) filter.uploadedBy = uploadedBy;
-  if (isPublic !== undefined) filter.isPublic = isPublic === 'true';
-  if (isFeatured !== undefined) filter.isFeatured = isFeatured === 'true';
-  
-  if (tags) {
-    const tagArray = tags.split(',').map(tag => tag.trim());
-    filter.tags = { $in: tagArray };
-  }
-
-  // Search functionality
+  const where = {};
+  if (type) where.type = type;
   if (search) {
-    filter.$or = [
-      { filename: { $regex: search, $options: 'i' } },
-      { originalName: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-      { altText: { $regex: search, $options: 'i' } }
+    where.OR = [
+      { title: { contains: search, mode: 'insensitive' } },
+      { url: { contains: search, mode: 'insensitive' } }
     ];
   }
 
-  // Calculate pagination
-  const skip = (page - 1) * limit;
-  
-  // Build sort object
-  const sort = {};
-  sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
-
-  // Execute query
+  const skip = (parseInt(page) - 1) * parseInt(limit);
   const [media, total] = await Promise.all([
-    Media.find(filter)
-      .populate('uploadedBy', 'name email avatar')
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .select('-__v'),
-    Media.countDocuments(filter)
+    prisma.media.findMany({
+      where,
+      orderBy: { [sortBy]: sortOrder === 'asc' ? 'asc' : 'desc' },
+      skip,
+      take: parseInt(limit)
+    }),
+    prisma.media.count({ where })
   ]);
-
-  const totalPages = Math.ceil(total / limit);
 
   res.json({
     success: true,
     data: media,
     pagination: {
       currentPage: parseInt(page),
-      totalPages,
+      totalPages: Math.ceil(total / parseInt(limit)),
       totalItems: total,
       itemsPerPage: parseInt(limit)
     }
@@ -216,173 +98,81 @@ export const getAllMedia = asyncHandler(async (req, res) => {
 
 // Get media by ID
 export const getMediaById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  const media = await Media.findById(id)
-    .populate('uploadedBy', 'name email avatar');
-
-  if (!media) {
-    throw new AppError('Media not found', 404);
-  }
-
-  res.json({
-    success: true,
-    data: media
-  });
+  const media = await prisma.media.findUnique({ where: { id: req.params.id } });
+  if (!media) throw new AppError('Media not found', 404);
+  res.json({ success: true, data: media });
 });
 
 // Update media
 export const updateMedia = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const updateData = req.body;
+  const media = await prisma.media.findUnique({ where: { id: req.params.id } });
+  if (!media) throw new AppError('Media not found', 404);
 
-  const media = await Media.findById(id);
-
-  if (!media) {
-    throw new AppError('Media not found', 404);
-  }
-
-  // Check authorization
-  if (!['admin', 'leader'].includes(req.user.role) && 
-      media.uploadedBy.toString() !== req.user._id.toString()) {
+  if (!['admin', 'leader'].includes(req.user.role)) {
     throw new AppError('Not authorized to update this media', 403);
   }
 
-  const updatedMedia = await Media.findByIdAndUpdate(
-    id,
-    updateData,
-    { new: true, runValidators: true }
-  ).populate('uploadedBy', 'name email avatar');
+  const { title, tags } = req.body;
+  const updateData = {};
+  if (title !== undefined) updateData.title = title;
+  if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim());
 
-  res.json({
-    success: true,
-    message: 'Media updated successfully',
-    data: updatedMedia
-  });
+  const updated = await prisma.media.update({ where: { id: req.params.id }, data: updateData });
+
+  res.json({ success: true, message: 'Media updated successfully', data: updated });
 });
 
 // Delete media
 export const deleteMedia = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const media = await prisma.media.findUnique({ where: { id: req.params.id } });
+  if (!media) throw new AppError('Media not found', 404);
 
-  const media = await Media.findById(id);
-
-  if (!media) {
-    throw new AppError('Media not found', 404);
-  }
-
-  // Check authorization
-  if (!['admin', 'leader'].includes(req.user.role) && 
-      media.uploadedBy.toString() !== req.user._id.toString()) {
+  if (!['admin', 'leader'].includes(req.user.role)) {
     throw new AppError('Not authorized to delete this media', 403);
   }
 
-  // Delete physical files
+  // Try to delete physical file
   try {
-    await fs.unlink(media.path);
-    if (media.thumbnailUrl) {
-      const thumbnailPath = path.join(process.cwd(), 'uploads', 'thumbnails', path.basename(media.thumbnailUrl));
-      await fs.unlink(thumbnailPath);
-    }
+    const filename = path.basename(media.url);
+    const filePath = path.join(process.cwd(), 'uploads', filename);
+    await fs.unlink(filePath);
   } catch (error) {
-    console.error('Error deleting physical files:', error);
+    console.error('Error deleting physical file:', error);
   }
 
-  await Media.findByIdAndDelete(id);
+  await prisma.media.delete({ where: { id: req.params.id } });
 
-  res.json({
-    success: true,
-    message: 'Media deleted successfully'
-  });
+  res.json({ success: true, message: 'Media deleted successfully' });
 });
 
 // Bulk update media
 export const bulkUpdateMedia = asyncHandler(async (req, res) => {
   const { mediaIds, updates } = req.body;
+  if (!mediaIds?.length) throw new AppError('Media IDs array is required', 400);
 
-  if (!mediaIds || !Array.isArray(mediaIds) || mediaIds.length === 0) {
-    throw new AppError('Media IDs array is required', 400);
-  }
+  const result = await prisma.media.updateMany({ where: { id: { in: mediaIds } }, data: updates });
 
-  const result = await Media.updateMany(
-    { _id: { $in: mediaIds } },
-    updates,
-    { runValidators: true }
-  );
-
-  res.json({
-    success: true,
-    message: `${result.modifiedCount} media files updated successfully`,
-    data: { modifiedCount: result.modifiedCount }
-  });
+  res.json({ success: true, message: `${result.count} media files updated`, data: { modifiedCount: result.count } });
 });
 
 // Bulk delete media
 export const bulkDeleteMedia = asyncHandler(async (req, res) => {
   const { mediaIds } = req.body;
+  if (!mediaIds?.length) throw new AppError('Media IDs array is required', 400);
 
-  if (!mediaIds || !Array.isArray(mediaIds) || mediaIds.length === 0) {
-    throw new AppError('Media IDs array is required', 400);
-  }
+  const result = await prisma.media.deleteMany({ where: { id: { in: mediaIds } } });
 
-  // Get media files to delete physical files
-  const mediaFiles = await Media.find({ _id: { $in: mediaIds } });
-
-  // Delete physical files
-  for (const media of mediaFiles) {
-    try {
-      await fs.unlink(media.path);
-      if (media.thumbnailUrl) {
-        const thumbnailPath = path.join(process.cwd(), 'uploads', 'thumbnails', path.basename(media.thumbnailUrl));
-        await fs.unlink(thumbnailPath);
-      }
-    } catch (error) {
-      console.error('Error deleting physical files:', error);
-    }
-  }
-
-  const result = await Media.deleteMany({ _id: { $in: mediaIds } });
-
-  res.json({
-    success: true,
-    message: `${result.deletedCount} media files deleted successfully`,
-    data: { deletedCount: result.deletedCount }
-  });
+  res.json({ success: true, message: `${result.count} media files deleted`, data: { deletedCount: result.count } });
 });
 
-// Get media statistics
+// Get media stats
 export const getMediaStats = asyncHandler(async (req, res) => {
-  const stats = await Media.aggregate([
-    {
-      $group: {
-        _id: '$type',
-        count: { $sum: 1 },
-        totalSize: { $sum: '$size' }
-      }
-    }
+  const [total, images, videos, documents] = await Promise.all([
+    prisma.media.count(),
+    prisma.media.count({ where: { type: 'image' } }),
+    prisma.media.count({ where: { type: 'video' } }),
+    prisma.media.count({ where: { type: 'document' } })
   ]);
 
-  const totalMedia = await Media.countDocuments();
-  const totalSize = await Media.aggregate([
-    { $group: { _id: null, total: { $sum: '$size' } } }
-  ]);
-
-  const categoryStats = await Media.aggregate([
-    {
-      $group: {
-        _id: '$category',
-        count: { $sum: 1 }
-      }
-    }
-  ]);
-
-  res.json({
-    success: true,
-    data: {
-      totalMedia,
-      totalSize: totalSize[0]?.total || 0,
-      byType: stats,
-      byCategory: categoryStats
-    }
-  });
+  res.json({ success: true, data: { totalMedia: total, images, videos, documents } });
 });

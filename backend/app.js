@@ -1,4 +1,5 @@
 import express from "express";
+import morgan from "morgan";
 import fs from "node:fs";
 import cors from "cors";
 import helmet from "helmet";
@@ -19,16 +20,16 @@ import analyticsRoutes from "./routes/analytics.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import config from "./config/environment.js";
 import setupSwagger from "./config/swagger.js";
-import User from "./models/User.js";
-import Event from "./models/Event.js";
-import Team from "./models/Team.js";
-import Content from "./models/Content.js";
-import Media from "./models/Media.js";
-import Contact from "./models/Contact.js";
-import AnalyticsEvent from "./models/AnalyticsEvent.js";
-import Donation from "./models/Donation.js";
 
 const app = express();
+
+// HTTP Request Logging
+if (config.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+} else {
+  app.use(morgan("combined"));
+}
+
 const apiLandingPageTemplate = fs.readFileSync(
   path.join(process.cwd(), "templates", "api-landing.html"),
   "utf8",
@@ -99,55 +100,15 @@ app.use(passport.session());
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 const apiRouteDefinitions = [
-  { basePath: "/api/auth", router: authRoutes, tag: "Auth", model: User },
-  {
-    basePath: "/api/users",
-    router: userRoutes,
-    tag: "Users",
-    model: User,
-  },
-  {
-    basePath: "/api/events",
-    router: eventRoutes,
-    tag: "Events",
-    model: Event,
-  },
-  {
-    basePath: "/api/teams",
-    router: teamRoutes,
-    tag: "Teams",
-    model: Team,
-  },
-  {
-    basePath: "/api/content",
-    router: contentRoutes,
-    tag: "Content",
-    model: Content,
-  },
-  {
-    basePath: "/api/media",
-    router: mediaRoutes,
-    tag: "Media",
-    model: Media,
-  },
-  {
-    basePath: "/api/contacts",
-    router: contactRoutes,
-    tag: "Contacts",
-    model: Contact,
-  },
-  {
-    basePath: "/api/analytics",
-    router: analyticsRoutes,
-    tag: "Analytics",
-    model: AnalyticsEvent,
-  },
-  {
-    basePath: "/api/payment",
-    router: paymentRoutes,
-    tag: "Payment",
-    model: Donation,
-  },
+  { basePath: "/api/auth", router: authRoutes, tag: "Auth" },
+  { basePath: "/api/users", router: userRoutes, tag: "Users" },
+  { basePath: "/api/events", router: eventRoutes, tag: "Events" },
+  { basePath: "/api/teams", router: teamRoutes, tag: "Teams" },
+  { basePath: "/api/content", router: contentRoutes, tag: "Content" },
+  { basePath: "/api/media", router: mediaRoutes, tag: "Media" },
+  { basePath: "/api/contacts", router: contactRoutes, tag: "Contacts" },
+  { basePath: "/api/analytics", router: analyticsRoutes, tag: "Analytics" },
+  { basePath: "/api/payment", router: paymentRoutes, tag: "Payment" },
 ];
 
 for (const routeDef of apiRouteDefinitions) {

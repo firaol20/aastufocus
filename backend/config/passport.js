@@ -1,9 +1,10 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { Strategy as JwtStrategy } from 'passport-jwt';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import User from '../models/User.js';
+import prisma from '../utils/prisma.js';
 import config from '../config/environment.js';
+import bcrypt from 'bcryptjs';
 
 const cookieExtractor = (req) => {
   if (req && req.cookies && req.cookies.access_token) return req.cookies.access_token;
@@ -15,12 +16,17 @@ passport.use(
     { usernameField: 'email', passwordField: 'password', session: false },
     async (email, password, done) => {
       try {
-        const user = await User.findByEmail(email).select('+password');
-        if (!user) return done(null, false);
+        const user = await prisma.user.findUnique({
+          where: { email: email.toLowerCase() }
+        });
+
+        if (!user || !user.password) return done(null, false);
         if (user.lockUntil && user.lockUntil > new Date()) return done(null, false);
         if (!user.isActive) return done(null, false);
-        const valid = await user.comparePassword(password);
+
+        const valid = await bcrypt.compare(password, user.password);
         if (!valid) return done(null, false);
+
         return done(null, user);
       } catch (err) {
         return done(err);
@@ -31,13 +37,28 @@ passport.use(
 
 passport.use(
   new JwtStrategy(
-    { jwtFromRequest: cookieExtractor, secretOrKey: config.JWT_SECRET },
+    {
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        cookieExtractor
+      ]),
+      secretOrKey: config.JWT_SECRET
+    },
     async (payload, done) => {
       try {
-        const user = await User.findById(payload.userId).select('-password');
+        const user = await prisma.user.findUnique({
+          where: { id: payload.userId }
+        });
+
         if (!user) return done(null, false);
         if (!user.isActive) return done(null, false);
-        if (user.changedPasswordAfter?.(payload.iat)) return done(null, false);
+        
+        // Check if password was changed after token issued
+        if (user.passwordChangedAt) {
+          const changedTimestamp = parseInt(user.passwordChangedAt.getTime() / 1000, 10);
+          if (payload.iat < changedTimestamp) return done(null, false);
+        }
+
         return done(null, user);
       } catch (err) {
         return done(err, false);
@@ -51,11 +72,10 @@ passport.use(
     {
       clientID: config.GOOGLE_CLIENT_ID,
       clientSecret: config.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/api/auth/google/callback", // Fixed: matches route
+      callbackURL: "/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // Validate profile data
         if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
           return done(new Error('No email in Google profile'), null);
         }
@@ -65,32 +85,44 @@ passport.use(
         const displayName = profile.displayName || 'Unknown User';
         const avatarUrl = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
 
-        // Check for existing user by googleId first
-        let user = await User.findOne({ googleId });
-        
-        // If no user found, check for existing user with same email
+        let user = await prisma.user.findUnique({
+          where: { googleId: googleId }
+        });
+
         if (!user) {
-          user = await User.findOne({ email });
-          // Link Google account to existing user
+          user = await prisma.user.findUnique({
+            where: { email: email }
+          });
+
           if (user) {
-            user.googleId = googleId;
-            if (avatarUrl && !user.avatar) user.avatar = avatarUrl;
-            await user.save();
+            // Link Google account to existing user
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                googleId,
+                avatar: user.avatar || avatarUrl,
+                lastLogin: new Date()
+              }
+            });
           } else {
             // Create new user
-            user = new User({
-              googleId,
-              email,
-              name: displayName,
-              avatar: avatarUrl,
+            user = await prisma.user.create({
+              data: {
+                googleId,
+                email,
+                name: displayName,
+                avatar: avatarUrl,
+                lastLogin: new Date()
+              }
             });
-            await user.save();
           }
+        } else {
+          // Update lastLogin
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLogin: new Date() }
+          });
         }
-
-        // Always update lastLogin
-        user.lastLogin = new Date();
-        await user.save();
 
         done(null, user);
       } catch (err) {
@@ -103,10 +135,12 @@ passport.use(
 
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
-  done(null, user);
+  try {
+    const user = await prisma.user.findUnique({ where: { id } });
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 
 export default passport;
-
-

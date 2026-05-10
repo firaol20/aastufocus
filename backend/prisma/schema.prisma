@@ -1,0 +1,319 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String          @id @default(uuid())
+  name                String
+  email               String          @unique
+  password            String?
+  role                Role            @default(member)
+  avatar              String?
+  department          String?
+  yearOfStudy         Int?
+  phone               String?
+  isActive            Boolean         @default(true)
+  lastLogin           DateTime?
+  passwordChangedAt   DateTime?
+  googleId            String?         @unique
+  refreshTokenHash    String?
+  refreshTokenSetAt   DateTime?
+  failedLoginAttempts Int             @default(0)
+  lockUntil           DateTime?
+  passwordResetToken  String?
+  passwordResetExpires DateTime?
+  isVerified          Boolean         @default(false)
+  verificationToken   String?
+  verificationExpires DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  eventsCreated       Event[]         @relation("EventCreator")
+  eventAttendees      EventAttendee[]
+  teamsLed            Team[]          @relation("TeamLeader")
+  teamMemberships     TeamMember[]
+  donations           Donation[]      @relation("UserDonations")
+  donationsCreated    Donation[]      @relation("DonationCreator")
+  donationsUpdated    Donation[]      @relation("DonationUpdater")
+
+  @@index([role])
+  @@index([isActive])
+  @@index([department])
+}
+
+enum Role {
+  admin
+  leader
+  member
+}
+
+model Event {
+  id               String          @id @default(uuid())
+  title            String
+  description      String
+  date             DateTime
+  startTime        String
+  endTime          String
+  location         String
+  category         EventCategory   @default(other)
+  maxAttendees     Int?
+  currentAttendees Int             @default(0)
+  image            String?
+  isActive         Boolean         @default(true)
+  isPublic         Boolean         @default(true)
+  createdBy        User            @relation("EventCreator", fields: [userId], references: [id])
+  userId           String
+  attendees        EventAttendee[]
+  tags             String[]        @default([])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([date, isActive])
+  @@index([category, isActive])
+  @@index([userId])
+}
+
+model EventAttendee {
+  id           String         @id @default(uuid())
+  event        Event          @relation(fields: [eventId], references: [id])
+  eventId      String
+  user         User           @relation(fields: [userId], references: [id])
+  userId       String
+  registeredAt DateTime       @default(now())
+  status       AttendeeStatus @default(registered)
+
+  @@unique([eventId, userId])
+}
+
+enum EventCategory {
+  worship
+  bible_study
+  prayer
+  fellowship
+  break_mission
+  outreach
+  training
+  other
+}
+
+enum AttendeeStatus {
+  registered
+  attended
+  cancelled
+}
+
+model Team {
+  id              String         @id @default(uuid())
+  name            String         @unique
+  description     String
+  category        TeamCategory
+  leader          User           @relation("TeamLeader", fields: [leaderId], references: [id])
+  leaderId        String
+  members         TeamMember[]
+  maxMembers      Int            @default(20)
+  image           String?
+  isActive        Boolean        @default(true)
+  isPublic        Boolean        @default(true)
+  meetingDay      Day?
+  meetingTime     String?
+  meetingLocation String?
+  goals           String[]       @default([])
+  achievements    Achievement[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([category, isActive])
+  @@index([leaderId])
+}
+
+model TeamMember {
+  id       String     @id @default(uuid())
+  team     Team       @relation(fields: [teamId], references: [id])
+  teamId   String
+  user     User       @relation(fields: [userId], references: [id])
+  userId   String
+  role     TeamRole   @default(member)
+  joinedAt DateTime   @default(now())
+  isActive Boolean    @default(true)
+
+  @@unique([teamId, userId])
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  team        Team     @relation(fields: [teamId], references: [id])
+  teamId      String
+  title       String
+  description String?
+  date        DateTime @default(now())
+}
+
+enum TeamCategory {
+  worship
+  action_and_prayer
+  ebenezer
+  fellowship
+  eleos
+  media
+  administration
+  nathanim
+  other
+}
+
+enum TeamRole {
+  member
+  assistant_leader
+  coordinator
+}
+
+enum Day {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+model Donation {
+  id                  String         @id @default(uuid())
+  donorName           String
+  donorEmail          String
+  donorPhone          String?
+  isAnonymous         Boolean        @default(false)
+  user                User?          @relation("UserDonations", fields: [userId], references: [id])
+  userId              String?
+  amount              Float
+  currency            String         @default("ETB")
+  paymentMethod       PaymentMethod
+  paymentStatus       PaymentStatus  @default(pending)
+  transactionId       String?        @unique
+  purpose             DonationPurpose
+  category            DonationCategory
+  campaignName        String?
+  campaignId          String?
+  isRecurring         Boolean        @default(false)
+  frequency           Frequency?
+  nextDueDate         DateTime?
+  endDate             DateTime?
+  totalOccurrences    Int?
+  currentOccurrence   Int            @default(0)
+  status              DonationStatus @default(active)
+  notes               String?
+  tags                String[]       @default([])
+  receiptSent         Boolean        @default(false)
+  receiptSentAt       DateTime?
+  acknowledgmentSent  Boolean        @default(false)
+  acknowledgmentSentAt DateTime?
+  donationDate        DateTime       @default(now())
+  createdBy           User?          @relation("DonationCreator", fields: [createdById], references: [id])
+  createdById         String?
+  updatedBy           User?          @relation("DonationUpdater", fields: [updatedById], references: [id])
+  updatedById         String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@index([donorEmail])
+  @@index([userId])
+  @@index([paymentStatus])
+  @@index([purpose])
+  @@index([category])
+  @@index([donationDate])
+  @@index([amount])
+}
+
+enum PaymentMethod {
+  cash
+  bank_transfer
+  mobile_money
+  online_payment
+  check
+  other
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
+  cancelled
+  refunded
+}
+
+enum DonationPurpose {
+  general_fund
+  event_sponsorship
+  building_fund
+  mission_trip
+  bible_study_materials
+  youth_programs
+  outreach_programs
+  emergency_relief
+  other
+}
+
+enum DonationCategory {
+  tithe
+  offering
+  special_offering
+  pledge
+  memorial
+  honorarium
+  sponsorship
+  other
+}
+
+enum Frequency {
+  weekly
+  monthly
+  quarterly
+  yearly
+}
+
+enum DonationStatus {
+  active
+  archived
+  deleted
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("pending") // e.g., pending, replied, archived
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Content {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  type      String   // e.g., hero, about, mission
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Media {
+  id        String   @id @default(uuid())
+  url       String
+  type      String   // e.g., image, video
+  title     String?
+  tags      String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  type      String
+  metadata  Json?
+  timestamp DateTime @default(now())
+}

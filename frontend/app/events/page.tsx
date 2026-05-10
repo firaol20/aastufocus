@@ -4,7 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, MapPin, Clock } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Dialog,
@@ -15,28 +21,149 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EventRegistrationForm, {
   RegistrationFormData,
 } from "@/components/event-registration-form";
 import { Banner } from "@/components/banner";
 
+const heroSlides = [
+  {
+    image: "/hero-section/hero-4.jpg",
+    title: "WORSHIP \n NIGHTS",
+    description:
+      "Join us for an unforgettable night of worship, praise, and spiritual reflection. Let's come together to lift our voices and experience the presence of God.",
+  },
+  {
+    image: "/hero-section/hero-2.jpg",
+    title: "BIBLE STUDY \n FELLOWSHIP",
+    description:
+      "Dive deep into the Word of God together. Grow in understanding, ask questions, and build lasting friendships in our weekly Bible study groups.",
+  },
+  {
+    image: "/hero-section/hero-3.jpg",
+    title: "COMMUNITY \n OUTREACH",
+    description:
+      "Be the hands and feet of Jesus. Join our latest mission trips and community service events to spread love and hope in our city.",
+  },
+];
+
 export default function EventsPage() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide(
+      (prev) => (prev - 1 + heroSlides.length) % heroSlides.length,
+    );
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <Banner title="Events" subTitle="Join us for fellowship, worship, Bible study, and community service
-            events throughout the year."/>
+      {/* Hero Section */}
+      <section className="relative h-[500px] md:h-[650px] w-full flex items-center justify-center overflow-hidden">
+        {heroSlides.map((slide, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+            }`}
+          >
+            <Image
+              src={slide.image}
+              alt="Hero Background"
+              fill
+              className="object-cover"
+              priority={index === 0}
+            />
+            <div className="absolute inset-0 bg-[#3f125a]/70 mix-blend-multiply"></div>
+          </div>
+        ))}
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-20"
+        >
+          <ChevronLeft className="w-12 h-12 md:w-16 md:h-16 font-light stroke-1" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-20"
+        >
+          <ChevronRight className="w-12 h-12 md:w-16 md:h-16 font-light stroke-1" />
+        </button>
+
+        <div className="relative z-20 text-center text-white px-4 max-w-4xl mx-auto">
+          <h1
+            key={`title-${currentSlide}`}
+            className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-[0.2em] mb-4 uppercase leading-tight scale-y-110 whitespace-pre-line animate-in fade-in slide-in-from-bottom-4 duration-700"
+          >
+            {heroSlides[currentSlide].title}
+          </h1>
+          <p
+            key={`desc-${currentSlide}`}
+            className="text-sm md:text-base lg:text-lg mb-10 text-white/90 font-light max-w-3xl mx-auto tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150"
+          >
+            {heroSlides[currentSlide].description}
+          </p>
+          <Button className="bg-white text-black hover:bg-gray-100 font-bold px-10 py-6 rounded-none uppercase tracking-[0.1em] text-[13px]">
+            READ MORE
+          </Button>
+
+          {/* Slide Indicators */}
+          <div className="absolute bottom-[-60px] md:bottom-[-80px] left-1/2 -translate-x-1/2 flex gap-3">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentSlide
+                    ? "bg-white w-8"
+                    : "bg-white/40 hover:bg-white/80"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Events Tabs */}
-      <section className="py-16 px-10">
-        <div className="container mx-auto px-4">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute top-1/4 left-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="container mx-auto max-w-7xl relative z-10">
           <Tabs defaultValue="upcoming" className="w-full">
-            <div className="flex justify-center mb-8">
-              <TabsList>
-                <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
-                <TabsTrigger value="past">Past Events</TabsTrigger>
-                <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+            <div className="flex justify-center mb-12">
+              <TabsList className="bg-muted/50 backdrop-blur-md p-1.5 rounded-full border border-border/50">
+                <TabsTrigger
+                  value="upcoming"
+                  className="rounded-full px-8 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md"
+                >
+                  Upcoming Events
+                </TabsTrigger>
+                <TabsTrigger
+                  value="past"
+                  className="rounded-full px-8 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md"
+                >
+                  Past Events
+                </TabsTrigger>
+                <TabsTrigger
+                  value="calendar"
+                  className="rounded-full px-8 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md"
+                >
+                  Calendar View
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -70,7 +197,7 @@ export default function EventsPage() {
                       <div key={day} className="text-center font-medium p-2">
                         {day}
                       </div>
-                    )
+                    ),
                   )}
 
                   {/* Calendar days */}

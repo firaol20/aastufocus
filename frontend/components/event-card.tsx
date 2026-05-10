@@ -52,7 +52,10 @@ export default function EventCard({
         <CardFooter className="px-6 pb-6 pt-0">
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" className="w-full hover:border-primary/60">
+              <Button
+                variant="outline"
+                className="w-full hover:border-primary/60"
+              >
                 Learn More
               </Button>
             </DialogTrigger>

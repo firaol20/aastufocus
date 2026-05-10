@@ -1,16 +1,14 @@
 import { asyncHandler } from '../middleware/errorsHandler.js';
 import { AppError } from '../middleware/errorsHandler.js';
-import Event from '../models/Event.js';
-import User from '../models/User.js';
+import prisma from '../utils/prisma.js';
 
 // Create new event
 export const createEvent = asyncHandler(async (req, res) => {
-
   if(!req.body) {
     throw new AppError('Request body is missing', 400);
   }
 
-  const { startTime, endTime } = req.body;
+  const { title, description, date, startTime, endTime, location, category, maxAttendees, isPublic, tags } = req.body;
 
   if (!startTime || !endTime) {
     throw new AppError('Start time and end time are required', 400);
@@ -21,21 +19,31 @@ export const createEvent = asyncHandler(async (req, res) => {
   }
 
   const eventData = {
-    ...req.body,
-    createdBy: req.user._id
+    title,
+    description,
+    date: new Date(date),
+    startTime,
+    endTime,
+    location,
+    category,
+    maxAttendees: maxAttendees ? parseInt(maxAttendees) : null,
+    isPublic: isPublic === 'true' || isPublic === true,
+    tags: Array.isArray(tags) ? tags : [],
+    userId: req.user.id
   };
 
   if(req.file) {
-    eventData.image = `/uploads/${req.file.filename}`
+    eventData.image = `/uploads/${req.file.filename}`;
   }
 
-
-  // Check if end time is after start time
-  if (req.body.startTime >= req.body.endTime) {
-    throw new AppError('End time must be after start time', 400);
-  }
-
-  const event = await Event.create(eventData);
+  const event = await prisma.event.create({
+    data: eventData,
+    include: {
+      createdBy: {
+        select: { id: true, name: true, email: true }
+      }
+    }
+  });
 
   res.status(201).json({
     success: true,
@@ -56,39 +64,40 @@ export const getAllEvents = asyncHandler(async (req, res) => {
     sortOrder = 'asc'
   } = req.query;
 
-  // Build filter
-  const filter = { isActive: true };
-  
+  // Build Prisma where filter
+  const where = { isActive: true };
+
   if (category) {
-    filter.category = category;
+    where.category = category;
   }
-  
+
   if (upcoming === 'true') {
-    filter.date = { $gte: new Date() };
+    where.date = { gte: new Date() };
   }
-  
+
   if (search) {
-    filter.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-      { location: { $regex: search, $options: 'i' } }
+    where.OR = [
+      { title: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+      { location: { contains: search, mode: 'insensitive' } }
     ];
   }
 
-  // Build sort
-  const sort = {};
-  sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
 
-  // Pagination
-  const skip = (page - 1) * limit;
-
-  const events = await Event.find(filter)
-    .populate('createdBy', 'name email')
-    .sort(sort)
-    .skip(skip)
-    .limit(parseInt(limit));
-
-  const total = await Event.countDocuments(filter);
+  const [events, total] = await Promise.all([
+    prisma.event.findMany({
+      where,
+      include: {
+        createdBy: { select: { id: true, name: true, email: true } },
+        _count: { select: { attendees: true } }
+      },
+      orderBy: { [sortBy]: sortOrder === 'desc' ? 'desc' : 'asc' },
+      skip,
+      take: parseInt(limit)
+    }),
+    prisma.event.count({ where })
+  ]);
 
   res.json({
     success: true,
@@ -97,16 +106,25 @@ export const getAllEvents = asyncHandler(async (req, res) => {
       page: parseInt(page),
       limit: parseInt(limit),
       total,
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / parseInt(limit))
     }
   });
 });
 
 // Get single event
 export const getEventById = asyncHandler(async (req, res) => {
-  const event = await Event.findById(req.params.id)
-    .populate('createdBy', 'name email')
-    .populate('attendees.user', 'name email avatar');
+  const event = await prisma.event.findUnique({
+    where: { id: req.params.id },
+    include: {
+      createdBy: { select: { id: true, name: true, email: true } },
+      attendees: {
+        include: {
+          user: { select: { id: true, name: true, email: true, avatar: true } }
+        }
+      },
+      _count: { select: { attendees: true } }
+    }
+  });
 
   if (!event) {
     throw new AppError('Event not found', 404);
@@ -124,14 +142,16 @@ export const getEventById = asyncHandler(async (req, res) => {
 
 // Update event
 export const updateEvent = asyncHandler(async (req, res) => {
-  const event = await Event.findById(req.params.id);
+  const event = await prisma.event.findUnique({
+    where: { id: req.params.id }
+  });
 
   if (!event) {
     throw new AppError('Event not found', 404);
   }
 
   // Check if user can update this event
-  if (event.createdBy.toString() !== req.user._id.toString() && !['admin', 'leader'].includes(req.user.role)) {
+  if (event.userId !== req.user.id && !['admin', 'leader'].includes(req.user.role)) {
     throw new AppError('Not authorized to update this event', 403);
   }
 
@@ -140,11 +160,29 @@ export const updateEvent = asyncHandler(async (req, res) => {
     throw new AppError('End time must be after start time', 400);
   }
 
-  const updatedEvent = await Event.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true, runValidators: true }
-  ).populate('createdBy', 'name email');
+  const { title, description, date, startTime, endTime, location, category, maxAttendees, isPublic, tags, isActive } = req.body;
+
+  const updateData = {};
+  if (title !== undefined) updateData.title = title;
+  if (description !== undefined) updateData.description = description;
+  if (date !== undefined) updateData.date = new Date(date);
+  if (startTime !== undefined) updateData.startTime = startTime;
+  if (endTime !== undefined) updateData.endTime = endTime;
+  if (location !== undefined) updateData.location = location;
+  if (category !== undefined) updateData.category = category;
+  if (maxAttendees !== undefined) updateData.maxAttendees = parseInt(maxAttendees);
+  if (isPublic !== undefined) updateData.isPublic = isPublic === 'true' || isPublic === true;
+  if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : [];
+  if (isActive !== undefined) updateData.isActive = isActive === 'true' || isActive === true;
+  if (req.file) updateData.image = `/uploads/${req.file.filename}`;
+
+  const updatedEvent = await prisma.event.update({
+    where: { id: req.params.id },
+    data: updateData,
+    include: {
+      createdBy: { select: { id: true, name: true, email: true } }
+    }
+  });
 
   res.json({
     success: true,
@@ -155,18 +193,22 @@ export const updateEvent = asyncHandler(async (req, res) => {
 
 // Delete event
 export const deleteEvent = asyncHandler(async (req, res) => {
-  const event = await Event.findById(req.params.id);
+  const event = await prisma.event.findUnique({
+    where: { id: req.params.id }
+  });
 
   if (!event) {
     throw new AppError('Event not found', 404);
   }
 
   // Check if user can delete this event
-  if (event.createdBy.toString() !== req.user._id.toString() && !['admin', 'leader'].includes(req.user.role)) {
+  if (event.userId !== req.user.id && !['admin', 'leader'].includes(req.user.role)) {
     throw new AppError('Not authorized to delete this event', 403);
   }
 
-  await Event.findByIdAndDelete(req.params.id);
+  // Delete attendees first (cascade), then event
+  await prisma.eventAttendee.deleteMany({ where: { eventId: req.params.id } });
+  await prisma.event.delete({ where: { id: req.params.id } });
 
   res.json({
     success: true,
@@ -177,9 +219,12 @@ export const deleteEvent = asyncHandler(async (req, res) => {
 // Register for event
 export const registerForEvent = asyncHandler(async (req, res) => {
   const { eventId } = req.body;
-  const userId = req.user._id;
+  const userId = req.user.id;
 
-  const event = await Event.findById(eventId);
+  const event = await prisma.event.findUnique({
+    where: { id: eventId }
+  });
+
   if (!event) {
     throw new AppError('Event not found', 404);
   }
@@ -189,84 +234,99 @@ export const registerForEvent = asyncHandler(async (req, res) => {
   }
 
   // Check if event is full
-  if (event.isFull) {
+  const activeAttendeesCount = await prisma.eventAttendee.count({
+    where: { eventId, status: { not: 'cancelled' } }
+  });
+
+  if (event.maxAttendees && activeAttendeesCount >= event.maxAttendees) {
     throw new AppError('Event is full', 400);
   }
 
   // Check if user is already registered
-  const existingRegistration = event.attendees.find(
-    attendee => attendee.user.toString() === userId.toString()
-  );
+  const existingRegistration = await prisma.eventAttendee.findUnique({
+    where: { eventId_userId: { eventId, userId } }
+  });
 
   if (existingRegistration) {
     if (existingRegistration.status === 'cancelled') {
-      // Reactivate cancelled registration
-      existingRegistration.status = 'registered';
-      await event.save();
-      
+      const updatedRegistration = await prisma.eventAttendee.update({
+        where: { id: existingRegistration.id },
+        data: { status: 'registered', registeredAt: new Date() }
+      });
       return res.json({
         success: true,
         message: 'Event registration reactivated',
-        data: event
+        data: updatedRegistration
       });
     } else {
       throw new AppError('Already registered for this event', 400);
     }
   }
 
-  // Add user to attendees
-  event.attendees.push({
-    user: userId,
-    status: 'registered'
+  const registration = await prisma.eventAttendee.create({
+    data: { eventId, userId, status: 'registered' }
   });
-
-  await event.save();
 
   res.json({
     success: true,
     message: 'Successfully registered for event',
-    data: event
+    data: registration
   });
 });
 
 // Cancel event registration
 export const cancelEventRegistration = asyncHandler(async (req, res) => {
   const { eventId } = req.body;
-  const userId = req.user._id;
+  const userId = req.user.id;
 
-  const event = await Event.findById(eventId);
-  if (!event) {
-    throw new AppError('Event not found', 404);
-  }
+  const registration = await prisma.eventAttendee.findUnique({
+    where: { eventId_userId: { eventId, userId } }
+  });
 
-  const attendeeIndex = event.attendees.findIndex(
-    attendee => attendee.user.toString() === userId.toString()
-  );
-
-  if (attendeeIndex === -1) {
+  if (!registration) {
     throw new AppError('Not registered for this event', 400);
   }
 
-  event.attendees[attendeeIndex].status = 'cancelled';
-  await event.save();
+  if (registration.status === 'cancelled') {
+    throw new AppError('Registration is already cancelled', 400);
+  }
+
+  const updated = await prisma.eventAttendee.update({
+    where: { id: registration.id },
+    data: { status: 'cancelled' }
+  });
 
   res.json({
     success: true,
     message: 'Event registration cancelled',
-    data: event
+    data: updated
   });
 });
 
 // Get user's registered events
 export const getUserEvents = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.id;
 
-  const events = await Event.find({
-    'attendees.user': userId,
-    'attendees.status': { $ne: 'cancelled' }
-  })
-    .populate('createdBy', 'name email')
-    .sort({ date: 1 });
+  const registrations = await prisma.eventAttendee.findMany({
+    where: {
+      userId,
+      status: { not: 'cancelled' }
+    },
+    include: {
+      event: {
+        include: {
+          createdBy: { select: { id: true, name: true, email: true } }
+        }
+      }
+    },
+    orderBy: { event: { date: 'asc' } }
+  });
+
+  const events = registrations.map(r => ({
+    ...r.event,
+    registrationStatus: r.status,
+    registeredAt: r.registeredAt
+  }));
 
   res.json({
     success: true,
@@ -278,30 +338,35 @@ export const getUserEvents = asyncHandler(async (req, res) => {
 export const markAttendance = asyncHandler(async (req, res) => {
   const { eventId, userId, status } = req.body;
 
-  const event = await Event.findById(eventId);
+  const event = await prisma.event.findUnique({
+    where: { id: eventId }
+  });
+
   if (!event) {
     throw new AppError('Event not found', 404);
   }
 
   // Check if user can mark attendance
-  if (event.createdBy.toString() !== req.user._id.toString() && !['admin', 'leader'].includes(req.user.role)) {
+  if (event.userId !== req.user.id && !['admin', 'leader'].includes(req.user.role)) {
     throw new AppError('Not authorized to mark attendance', 403);
   }
 
-  const attendee = event.attendees.find(
-    a => a.user.toString() === userId
-  );
+  const registration = await prisma.eventAttendee.findUnique({
+    where: { eventId_userId: { eventId, userId } }
+  });
 
-  if (!attendee) {
+  if (!registration) {
     throw new AppError('User not registered for this event', 400);
   }
 
-  attendee.status = status;
-  await event.save();
+  const updated = await prisma.eventAttendee.update({
+    where: { id: registration.id },
+    data: { status }
+  });
 
   res.json({
     success: true,
     message: 'Attendance marked successfully',
-    data: event
+    data: updated
   });
 });

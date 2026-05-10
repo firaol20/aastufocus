@@ -1,16 +1,21 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Quote } from "lucide-react"
-import { ScaleOnHover } from "@/components/animations/motion"
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Quote } from "lucide-react";
+import { ScaleOnHover } from "@/components/animations/motion";
 
 interface TestimonialCardProps {
-  quote: string
-  name: string
-  role: string
-  avatarSrc: string
+  quote: string;
+  name: string;
+  role: string;
+  avatarSrc: string;
 }
 
-export default function TestimonialCard({ quote, name, role, avatarSrc }: TestimonialCardProps) {
+export default function TestimonialCard({
+  quote,
+  name,
+  role,
+  avatarSrc,
+}: TestimonialCardProps) {
   return (
     <ScaleOnHover>
       <Card className="h-full transition-shadow duration-300 hover:shadow-lg dark-mode-transition">
@@ -30,5 +35,5 @@ export default function TestimonialCard({ quote, name, role, avatarSrc }: Testim
         </CardContent>
       </Card>
     </ScaleOnHover>
-  )
+  );
 }

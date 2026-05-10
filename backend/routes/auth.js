@@ -11,6 +11,8 @@ import {
   login,
   register,
   registerAdmin,
+  verifyEmail,
+  resendVerificationCode,
   refreshToken,
   logout,
 } from "../controllers/userController.js";
@@ -19,6 +21,8 @@ const router = express.Router();
 
 router.post("/register", validateRequest(registerSchema), register);
 router.post("/register/admin", validateRequest(registerSchema), registerAdmin);
+router.post("/verify-email", verifyEmail);
+router.post("/resend-verification", resendVerificationCode);
 router.post("/login", validateRequest(loginSchema), login);
 router.post("/refresh-token", refreshToken);
 router.post("/logout", logout);

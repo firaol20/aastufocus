@@ -1,18 +1,35 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "@/hooks/use-toast"
-import { Mail, Phone, MapPin, Clock, Facebook, Instagram, Twitter, Youtube, CheckCircle2 } from "lucide-react"
-import { Banner } from "@/components/banner"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  CheckCircle2,
+} from "lucide-react";
+import { Banner } from "@/components/banner";
+import Image from "next/image";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -20,38 +37,63 @@ export default function ContactPage() {
     email: "",
     subject: "",
     message: "",
-  })
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSelectChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, subject: value }))
-  }
+    setFormData((prev) => ({ ...prev, subject: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Here you would typically send the data to your backend
-    console.log(formData)
+    console.log(formData);
 
     // Show success message
     toast({
       title: "Message sent successfully!",
       description: "We'll get back to you as soon as possible.",
-    })
+    });
 
     // Reset form and show thank you message
-    setIsSubmitted(true)
-  }
+    setIsSubmitted(true);
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <Banner title="Contact Us" subTitle="Have questions or want to get in touch? We'd love to hear from you!"/>
+      {/* Hero Section */}
+      <section className="relative h-[400px] md:h-[500px] w-full flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/hero-section/hero-6.jpg"
+            alt="Contact Background"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-[#3f125a]/70 mix-blend-multiply"></div>
+        </div>
+
+        <div className="relative z-20 text-center text-white px-4 max-w-3xl mx-auto mt-10 md:mt-16">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-[0.2em] mb-6 uppercase leading-tight scale-y-110">
+              CONTACT US
+            </h1>
+            <p className="text-sm md:text-base lg:text-lg text-white/90 font-light tracking-wide leading-relaxed">
+              Have questions or want to get in touch? We'd love to hear from
+              you!
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Contact Form and Info */}
       <section className="py-16 px-4 md:px-10">
@@ -61,13 +103,20 @@ export default function ContactPage() {
               <div>
                 <h2 className="text-3xl font-bold mb-6">Send Us a Message</h2>
                 <p className="text-muted-foreground mb-8">
-                  Fill out the form below and we'll get back to you as soon as possible.
+                  Fill out the form below and we'll get back to you as soon as
+                  possible.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Your Name *</Label>
-                    <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -90,9 +139,15 @@ export default function ContactPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="general">General Inquiry</SelectItem>
-                        <SelectItem value="events">Events Information</SelectItem>
-                        <SelectItem value="membership">Membership Questions</SelectItem>
-                        <SelectItem value="volunteer">Volunteer Opportunities</SelectItem>
+                        <SelectItem value="events">
+                          Events Information
+                        </SelectItem>
+                        <SelectItem value="membership">
+                          Membership Questions
+                        </SelectItem>
+                        <SelectItem value="volunteer">
+                          Volunteer Opportunities
+                        </SelectItem>
                         <SelectItem value="prayer">Prayer Request</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
@@ -121,18 +176,25 @@ export default function ContactPage() {
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
                   <CheckCircle2 className="h-10 w-10 text-primary" />
                 </div>
-                <h2 className="text-3xl font-bold mb-4 text-center">Thank You!</h2>
+                <h2 className="text-3xl font-bold mb-4 text-center">
+                  Thank You!
+                </h2>
                 <p className="text-muted-foreground mb-8 text-center max-w-md">
-                  Your message has been sent successfully. We'll get back to you as soon as possible.
+                  Your message has been sent successfully. We'll get back to you
+                  as soon as possible.
                 </p>
-                <Button onClick={() => setIsSubmitted(false)}>Send Another Message</Button>
+                <Button onClick={() => setIsSubmitted(false)}>
+                  Send Another Message
+                </Button>
               </div>
             )}
 
             <div className="space-y-8">
               <div>
                 <h2 className="text-3xl font-bold mb-6">Contact Information</h2>
-                <p className="text-muted-foreground mb-8">Here's how you can reach us directly or find us on campus.</p>
+                <p className="text-muted-foreground mb-8">
+                  Here's how you can reach us directly or find us on campus.
+                </p>
 
                 <div className="space-y-6">
                   <Card>
@@ -143,7 +205,10 @@ export default function ContactPage() {
                       <div>
                         <h3 className="font-bold text-lg">Email</h3>
                         <p className="text-muted-foreground">
-                          <a href="mailto:contact@aastufocus.org" className="hover:text-primary">
+                          <a
+                            href="mailto:contact@aastufocus.org"
+                            className="hover:text-primary"
+                          >
                             contact@aastufocus.org
                           </a>
                         </p>
@@ -159,7 +224,10 @@ export default function ContactPage() {
                       <div>
                         <h3 className="font-bold text-lg">Phone</h3>
                         <p className="text-muted-foreground">
-                          <a href="tel:+251911234567" className="hover:text-primary">
+                          <a
+                            href="tel:+251911234567"
+                            className="hover:text-primary"
+                          >
                             +251 911 234 567
                           </a>
                         </p>
@@ -248,7 +316,9 @@ export default function ContactPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-4">Find Us on Campus</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">We're located in the Student Center, Room 105</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              We're located in the Student Center, Room 105
+            </p>
           </div>
 
           <div className="relative h-[400px] rounded-lg overflow-hidden">
@@ -257,7 +327,9 @@ export default function ContactPage() {
               <div className="text-center">
                 <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
                 <p className="font-medium">Map would be displayed here</p>
-                <p className="text-sm text-muted-foreground">Addis Ababa Science and Technology University</p>
+                <p className="text-sm text-muted-foreground">
+                  Addis Ababa Science and Technology University
+                </p>
               </div>
             </div>
           </div>
@@ -267,9 +339,12 @@ export default function ContactPage() {
       {/* FAQ */}
       <section className="py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            Frequently Asked Questions
+          </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-            Can't find the answer you're looking for? Feel free to contact us directly.
+            Can't find the answer you're looking for? Feel free to contact us
+            directly.
           </p>
           <Button asChild>
             <Link href="/join-us#faq">View All FAQs</Link>
@@ -277,5 +352,5 @@ export default function ContactPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

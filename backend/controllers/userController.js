@@ -1,4 +1,5 @@
-import User from '../models/User.js';
+import prisma from '../utils/prisma.js';
+import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/jwtUtils.js';
 import passport from '../config/passport.js';
 import cookieParser from 'cookie-parser';
@@ -7,12 +8,17 @@ import config from '../config/environment.js';
 import { validatePasswordStrength } from '../utils/passwordUtils.js';
 import { AppError } from '../middleware/errorsHandler.js';
 import { asyncHandler } from '../middleware/errorsHandler.js';
+import emailService from '../services/emailService.js';
+import crypto from 'node:crypto';
 
 // register
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password, department, yearOfStudy, phone } = req.body;
 
-  const existingUser = await User.findByEmail(email);
+  const existingUser = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() }
+  });
+
   if (existingUser) {
     throw new AppError('User with this email already exists', 400);
   }
@@ -22,26 +28,138 @@ export const register = asyncHandler(async (req, res) => {
     throw new AppError(`Password validation failed: ${passwordValidation.errors.join(', ')}`, 400);
   }
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-    department,
-    yearOfStudy,
-    phone
+  // Hash password manually since we moved from Mongoose hooks
+  const salt = await bcrypt.genSalt(config.BCRYPT_SALT_ROUNDS || 12);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  // Generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const verificationExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      department,
+      yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : null,
+      phone,
+      verificationToken: otp, // We store OTP in the verificationToken field
+      verificationExpires,
+      isVerified: false
+    }
   });
 
-  const token = generateToken(user._id, user.role);
+  // Send verification OTP email
+  try {
+    await emailService.sendVerificationEmail(user, otp);
+  } catch (emailError) {
+    console.error('Failed to send verification email:', emailError);
+  }
 
-  user.password = undefined;
+  const access = signAccessToken(user);
+  const refresh = generateRefreshToken();
+  await persistRefreshToken(user.id, refresh);
+
+  // Exclude password from response
+  const { password: _, ...userWithoutPassword } = user;
 
   res.status(201).json({
     success: true,
-    message: 'User registered successfully',
+    message: 'User registered successfully. Please check your email to verify your account.',
     data: {
-      user,
-      token
+      user: userWithoutPassword,
+      accessToken: access,
+      refreshToken: refresh
     }
+  });
+});
+
+// verify email (OTP)
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    throw new AppError('Email and OTP code are required', 400);
+  }
+
+  const user = await prisma.user.findFirst({
+    where: {
+      email: email.toLowerCase(),
+      verificationToken: otp,
+      verificationExpires: { gt: new Date() }
+    }
+  });
+
+  if (!user) {
+    throw new AppError('Invalid or expired verification code', 400);
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      isVerified: true,
+      verificationToken: null,
+      verificationExpires: null
+    }
+  });
+
+  // Send welcome email after successful verification
+  try {
+    await emailService.sendWelcomeEmail(user);
+  } catch (emailError) {
+    console.error('Failed to send welcome email:', emailError);
+  }
+
+  res.json({
+    success: true,
+    message: 'Email verified successfully. Welcome to the fellowship!'
+  });
+});
+
+// resend verification code
+export const resendVerificationCode = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new AppError('Email is required', 400);
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() }
+  });
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  if (user.isVerified) {
+    throw new AppError('Email is already verified', 400);
+  }
+
+  // Generate new 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const verificationExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      verificationToken: otp,
+      verificationExpires
+    }
+  });
+
+  // Send verification OTP email
+  try {
+    await emailService.sendVerificationEmail(user, otp);
+  } catch (emailError) {
+    console.error('Failed to send verification email:', emailError);
+    throw new AppError('Failed to send verification email. Please try again later.', 500);
+  }
+
+  res.json({
+    success: true,
+    message: 'A new verification code has been sent to your email.'
   });
 });
 
@@ -49,7 +167,9 @@ export const register = asyncHandler(async (req, res) => {
 export const registerAdmin = asyncHandler(async (req, res) => {
   const { name, email, password, department, yearOfStudy, phone } = req.body;
 
-  const existingUser = await User.findByEmail(email);
+  const existingUser = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() }
+  });
   if (existingUser) {
     throw new AppError('User with this email already exists', 400);
   }
@@ -59,26 +179,37 @@ export const registerAdmin = asyncHandler(async (req, res) => {
     throw new AppError(`Password validation failed: ${passwordValidation.errors.join(', ')}`, 400);
   }
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-    department,
-    yearOfStudy,
-    phone,
-    role: 'admin' // Set role to admin
+  // Hash password manually
+  const salt = await bcrypt.genSalt(config.BCRYPT_SALT_ROUNDS || 12);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      department,
+      yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : null,
+      phone,
+      role: 'admin',
+      isVerified: true
+    }
   });
 
-  const token = generateToken(user._id, user.role);
+  const access = signAccessToken(user);
+  const refresh = generateRefreshToken();
+  await persistRefreshToken(user.id, refresh);
 
-  user.password = undefined;
+  // Exclude password from response
+  const { password: _, ...userWithoutPassword } = user;
 
   res.status(201).json({
     success: true,
     message: 'Admin user registered successfully',
     data: {
-      user,
-      token
+      user: userWithoutPassword,
+      accessToken: access,
+      refreshToken: refresh
     }
   });
 });
@@ -94,12 +225,15 @@ export const login = (req, res, next) => {
     }
 
     try {
-      user.lastLogin = new Date();
-      await user.save();
+      // Update lastLogin
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLogin: new Date() }
+      });
 
       const access = signAccessToken(user);
       const refresh = generateRefreshToken();
-      await persistRefreshToken(user._id, refresh);
+      await persistRefreshToken(user.id, refresh);
 
       const commonCookie = {
         httpOnly: true,
@@ -108,6 +242,9 @@ export const login = (req, res, next) => {
         path: '/',
       };
 
+      // Remove password from user object
+      const { password: _, ...userWithoutPassword } = user;
+
       res
         .cookie('access_token', access, { ...commonCookie, maxAge: 15 * 60 * 1000 })
         .cookie('refresh_token', refresh, { ...commonCookie, maxAge: 30 * 24 * 60 * 60 * 1000 })
@@ -115,8 +252,9 @@ export const login = (req, res, next) => {
           success: true,
           message: 'Login successful',
           data: {
-            user: { _id: user._id, name: user.name, email: user.email, role: user.role, department: user.department, yearOfStudy: user.yearOfStudy, phone: user.phone, isActive: user.isActive, lastLogin: user.lastLogin, createdAt: user.createdAt, updatedAt: user.updatedAt, avatar: user.avatar },
-            token: access
+            user: userWithoutPassword,
+            accessToken: access,
+            refreshToken: refresh
           }
         });
     } catch (e) {
@@ -140,7 +278,7 @@ export const refreshToken = asyncHandler(async (req, res) => {
 
   const access = signAccessToken(user);
   const newRefresh = generateRefreshToken();
-  await persistRefreshToken(user._id, newRefresh);
+  await persistRefreshToken(user.id, newRefresh);
 
   const commonCookie = {
     httpOnly: true,
@@ -156,7 +294,8 @@ export const refreshToken = asyncHandler(async (req, res) => {
       success: true, 
       message: 'Token refreshed',
       data: {
-        token: access
+        accessToken: access,
+        refreshToken: newRefresh
       }
     });
 });
@@ -171,12 +310,16 @@ export const logout = (req, res) => {
 
 // get profile
 export const getProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id);
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.id }
+  });
   
+  const { password: _, ...userWithoutPassword } = user;
+
   res.json({
     success: true,
     data: {
-      user
+      user: userWithoutPassword
     }
   });
 });
@@ -185,25 +328,23 @@ export const getProfile = asyncHandler(async (req, res) => {
 export const updateProfile = asyncHandler(async (req, res) => {
   const { name, department, yearOfStudy, phone } = req.body;
 
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user._id,
-    {
+  const updatedUser = await prisma.user.update({
+    where: { id: req.user.id },
+    data: {
       name,
       department,
-      yearOfStudy,
+      yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : undefined,
       phone
-    },
-    {
-      new: true,
-      runValidators: true
     }
-  );
+  });
+
+  const { password: _, ...userWithoutPassword } = updatedUser;
 
   res.json({
     success: true,
     message: 'Profile updated successfully',
     data: {
-      user: updatedUser
+      user: userWithoutPassword
     }
   });
 });
@@ -212,9 +353,11 @@ export const updateProfile = asyncHandler(async (req, res) => {
 export const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
-  const user = await User.findById(req.user._id).select('+password');
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.id }
+  });
 
-  if (!(await user.comparePassword(currentPassword))) {
+  if (!user || !user.password || !(await bcrypt.compare(currentPassword, user.password))) {
     throw new AppError('Current password is incorrect', 400);
   }
 
@@ -223,8 +366,16 @@ export const changePassword = asyncHandler(async (req, res) => {
     throw new AppError(`Password validation failed: ${passwordValidation.errors.join(', ')}`, 400);
   }
 
-  user.password = newPassword;
-  await user.save();
+  const salt = await bcrypt.genSalt(config.BCRYPT_SALT_ROUNDS || 12);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  await prisma.user.update({
+    where: { id: req.user.id },
+    data: {
+      password: hashedPassword,
+      passwordChangedAt: new Date()
+    }
+  });
 
   res.json({
     success: true,
@@ -236,34 +387,43 @@ export const changePassword = asyncHandler(async (req, res) => {
 export const getAllUsers = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, role, department, search } = req.query;
 
-  const filter = { isActive: true };
-  if (role) filter.role = role;
-  if (department) filter.department = department;
+  const where = { isActive: true };
+  if (role) where.role = role;
+  if (department) where.department = department;
   if (search) {
-    filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-      { department: { $regex: search, $options: 'i' } }
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { email: { contains: search, mode: 'insensitive' } },
+      { department: { contains: search, mode: 'insensitive' } }
     ];
   }
 
-  const users = await User.find(filter)
-    .select('-password')
-    .sort({ createdAt: -1 })
-    .limit(limit * 1)
-    .skip((page - 1) * limit);
+  const take = parseInt(limit);
+  const skip = (parseInt(page) - 1) * take;
 
-  const total = await User.countDocuments(filter);
+  const users = await prisma.user.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    take,
+    skip
+  });
+
+  const total = await prisma.user.count({ where });
+
+  const usersWithoutPasswords = users.map(u => {
+    const { password: _, ...uNoPass } = u;
+    return uNoPass;
+  });
 
   res.json({
     success: true,
     data: {
-      users,
+      users: usersWithoutPasswords,
       pagination: {
         currentPage: parseInt(page),
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / take),
         totalUsers: total,
-        usersPerPage: parseInt(limit)
+        usersPerPage: take
       }
     }
   });
@@ -271,16 +431,20 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
 // get user by id
 export const getUserById = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id).select('-password');
+  const user = await prisma.user.findUnique({
+    where: { id: req.params.id }
+  });
   
   if (!user) {
     throw new AppError('User not found', 404);
   }
 
+  const { password: _, ...userWithoutPassword } = user;
+
   res.json({
     success: true,
     data: {
-      user
+      user: userWithoutPassword
     }
   });
 });
@@ -289,43 +453,35 @@ export const getUserById = asyncHandler(async (req, res) => {
 export const updateUser = asyncHandler(async (req, res) => {
   const { name, email, role, department, yearOfStudy, phone, isActive } = req.body;
 
-  const updatedUser = await User.findByIdAndUpdate(
-    req.params.id,
-    {
+  const updatedUser = await prisma.user.update({
+    where: { id: req.params.id },
+    data: {
       name,
-      email,
+      email: email?.toLowerCase(),
       role,
       department,
-      yearOfStudy,
+      yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : undefined,
       phone,
       isActive
-    },
-    {
-      new: true,
-      runValidators: true
     }
-  ).select('-password');
+  });
 
-  if (!updatedUser) {
-    throw new AppError('User not found', 404);
-  }
+  const { password: _, ...userWithoutPassword } = updatedUser;
 
   res.json({
     success: true,
     message: 'User updated successfully',
     data: {
-      user: updatedUser
+      user: userWithoutPassword
     }
   });
 });
 
 // delete user (Admin only!)
 export const deleteUser = asyncHandler(async (req, res) => {
-  const user = await User.findByIdAndDelete(req.params.id);
-
-  if (!user) {
-    throw new AppError('User not found', 404);
-  }
+  await prisma.user.delete({
+    where: { id: req.params.id }
+  });
 
   res.json({
     success: true,
@@ -335,21 +491,18 @@ export const deleteUser = asyncHandler(async (req, res) => {
 
 // deactivate user (Admin only!)
 export const deactivateUser = asyncHandler(async (req, res) => {
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    { isActive: false },
-    { new: true }
-  ).select('-password');
+  const user = await prisma.user.update({
+    where: { id: req.params.id },
+    data: { isActive: false }
+  });
 
-  if (!user) {
-    throw new AppError('User not found', 404);
-  }
+  const { password: _, ...userWithoutPassword } = user;
 
   res.json({
     success: true,
     message: 'User deactivated successfully',
     data: {
-      user
+      user: userWithoutPassword
     }
   });
 });

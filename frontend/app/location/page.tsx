@@ -24,10 +24,30 @@ import { Banner } from "@/components/banner";
 export default function LocationPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <Banner title="Our Location" subTitle="Find us on campus and get directions to our fellowship meetings
-              and events"/>
-
+      {/* Hero Section */}
+      <section className="relative h-[400px] md:h-[500px] w-full flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/hero-section/university-location-hero.png"
+            alt="Location Background"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-[#3f125a]/70 mix-blend-multiply"></div>
+        </div>
+        
+        <div className="relative z-20 text-center text-white px-4 max-w-3xl mx-auto mt-10 md:mt-16">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-[0.2em] mb-6 uppercase leading-tight scale-y-110">
+              OUR LOCATION
+            </h1>
+            <p className="text-sm md:text-base lg:text-lg text-white/90 font-light tracking-wide leading-relaxed">
+              Find us on campus and get directions to our fellowship meetings and events.
+            </p>
+          </div>
+        </div>
+      </section>
       {/* Main Map Section */}
       <section className="py-16 px-4 md:px-10">
         <div className="container mx-auto px-4">

@@ -19,12 +19,13 @@ class EmailService {
   async init() {
     try {
       this.transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: config.EMAIL.HOST,
+        port: config.EMAIL.PORT,
+        secure: config.EMAIL.PORT === 465, // true for 465, false for other ports
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD
+          user: config.EMAIL.USER,
+          pass: config.EMAIL.PASS
         },
-        secure: process.env.NODE_ENV === 'production',
         tls: {
           rejectUnauthorized: false
         }
@@ -58,8 +59,22 @@ class EmailService {
       const adminResponsePath = path.join(templatesDir, 'adminResponse.html');
       const adminResponseHtml = fs.readFileSync(adminResponsePath, 'utf8');
       this.templates.adminResponse = handlebars.compile(adminResponseHtml);
+
+      // Load welcome template
+      const welcomePath = path.join(templatesDir, 'welcome.html');
+      const welcomeHtml = fs.readFileSync(welcomePath, 'utf8');
+      this.templates.welcome = handlebars.compile(welcomeHtml);
+
+      // Load password reset template
+      const passwordResetPath = path.join(templatesDir, 'passwordReset.html');
+      const passwordResetHtml = fs.readFileSync(passwordResetPath, 'utf8');
+      this.templates.passwordReset = handlebars.compile(passwordResetHtml);
+
+      // Load verification template
+      const verificationPath = path.join(templatesDir, 'verification.html');
+      const verificationHtml = fs.readFileSync(verificationPath, 'utf8');
+      this.templates.verification = handlebars.compile(verificationHtml);
       
-      console.log('✅ Email templates loaded successfully');
     } catch (error) {
       console.error('❌ Failed to load email templates:', error);
     }
@@ -226,6 +241,27 @@ class EmailService {
       return true;
     } catch (error) {
       console.error('❌ Failed to send password reset email:', error);
+      return false;
+    }
+  }
+
+  // Send verification email
+  async sendVerificationEmail(user, otp) {
+    try {
+      const data = {
+        name: user.name,
+        otp: otp,
+        currentDate: new Date().toLocaleDateString()
+      };
+
+      const subject = `Your Verification Code: ${otp}`;
+
+      await this.sendEmail(user.email, subject, 'verification', data);
+      
+      console.log(`✅ Verification OTP sent to ${user.email}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to send verification email:', error);
       return false;
     }
   }

@@ -17,12 +17,31 @@ import { Banner } from "@/components/banner";
 export default function TeamsPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <Banner
-        title="Our Teams"
-        subTitle="Discover the different ministry teams that make our fellowship
-              thrive and find where you can serve."
-      />
+      {/* Hero Section */}
+      <section className="relative h-[400px] md:h-[500px] w-full flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/hero-section/hero-4.jpg"
+            alt="Teams Background"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-[#3f125a]/70 mix-blend-multiply"></div>
+        </div>
+
+        <div className="relative z-20 text-center text-white px-4 max-w-3xl mx-auto mt-10 md:mt-16">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-[0.2em] mb-6 uppercase leading-tight scale-y-110">
+              OUR TEAMS
+            </h1>
+            <p className="text-sm md:text-base lg:text-lg text-white/90 font-light tracking-wide leading-relaxed">
+              Discover the different ministry teams that make our fellowship
+              thrive and find where you can serve.
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Teams Overview */}
       <section className="py-16 px-4 md:px-10">

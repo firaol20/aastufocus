@@ -1,112 +1,76 @@
-import Donation from '../models/Donation.js';
+import prisma from '../utils/prisma.js';
 import chapaService from '../services/chapaService.js';
+import { asyncHandler } from '../middleware/errorsHandler.js';
+import { AppError } from '../middleware/errorsHandler.js';
 
-export const initializePayment = async (req, res) => {
-  try {
-    const { donor, amount, currency, purpose, category, notes } = req.body;
+export const initializePayment = asyncHandler(async (req, res) => {
+  const { donor, amount, currency, purpose, category, notes } = req.body;
 
-    // Validate required fields
-    if (!donor?.name || !donor?.email || !amount || !purpose || !category) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required fields'
-      });
-    }
+  if (!donor?.name || !donor?.email || !amount || !purpose || !category) {
+    throw new AppError('Missing required fields', 400);
+  }
 
-    // Validate amount
-    if (amount < 0.01) {
-      return res.status(400).json({
-        success: false,
-        message: 'Amount must be at least 0.01'
-      });
-    }
+  if (amount < 0.01) {
+    throw new AppError('Amount must be at least 0.01', 400);
+  }
 
-    // Create donation record
-    const donation = new Donation({
-      donor,
-      amount,
+  const donation = await prisma.donation.create({
+    data: {
+      donorName: donor.name,
+      donorEmail: donor.email,
+      donorPhone: donor.phone || null,
+      amount: parseFloat(amount),
       currency: currency || 'ETB',
       purpose,
       category,
       notes,
       paymentMethod: 'online_payment',
       paymentStatus: 'pending',
-      createdBy: req.user?.id // If you have user authentication
-    });
-
-    await donation.save();
-
-    // Initialize Chapa payment
-    const paymentResult = await chapaService.initializePayment(donation);
-
-    res.json({
-      success: true,
-      message: 'Payment initialized successfully',
-      data: {
-        donationId: donation._id,
-        checkoutUrl: paymentResult.checkoutUrl,
-        transactionRef: paymentResult.transactionRef
-      }
-    });
-
-  } catch (error) {
-    console.error('Payment initialization error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Payment initialization failed',
-      error: error.message
-    });
-  }
-};
-
-export const verifyPayment = async (req, res) => {
-  try {
-    const { transactionId } = req.params;
-
-    const verification = await chapaService.verifyPayment(transactionId);
-
-    res.json({
-      success: true,
-      data: verification.data
-    });
-
-  } catch (error) {
-    console.error('Payment verification error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Payment verification failed'
-    });
-  }
-};
-
-export const getPaymentStatus = async (req, res) => {
-  try {
-    const { donationId } = req.params;
-
-    const donation = await Donation.findById(donationId);
-    if (!donation) {
-      return res.status(404).json({
-        success: false,
-        message: 'Donation not found'
-      });
+      ...(req.user?.id && { createdById: req.user.id })
     }
+  });
 
-    res.json({
-      success: true,
-      data: {
-        donationId: donation._id,
-        paymentStatus: donation.paymentStatus,
-        transactionId: donation.transactionId,
-        amount: donation.amount,
-        currency: donation.currency
-      }
-    });
+  const paymentResult = await chapaService.initializePayment({
+    _id: donation.id,
+    donor: { name: donation.donorName, email: donation.donorEmail, phone: donation.donorPhone },
+    amount: donation.amount,
+    currency: donation.currency,
+    purpose: donation.purpose,
+    category: donation.category
+  });
 
-  } catch (error) {
-    console.error('Get payment status error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get payment status'
-    });
-  }
-};
+  res.json({
+    success: true,
+    message: 'Payment initialized successfully',
+    data: {
+      donationId: donation.id,
+      checkoutUrl: paymentResult.checkoutUrl,
+      transactionRef: paymentResult.transactionRef
+    }
+  });
+});
+
+export const verifyPayment = asyncHandler(async (req, res) => {
+  const { transactionId } = req.params;
+  const verification = await chapaService.verifyPayment(transactionId);
+
+  res.json({ success: true, data: verification.data });
+});
+
+export const getPaymentStatus = asyncHandler(async (req, res) => {
+  const { donationId } = req.params;
+
+  const donation = await prisma.donation.findUnique({ where: { id: donationId } });
+  if (!donation) throw new AppError('Donation not found', 404);
+
+  res.json({
+    success: true,
+    data: {
+      donationId: donation.id,
+      paymentStatus: donation.paymentStatus,
+      transactionId: donation.transactionId,
+      amount: donation.amount,
+      currency: donation.currency
+    }
+  });
+});

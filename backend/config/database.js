@@ -1,28 +1,19 @@
-import mongoose from "mongoose"
-import config from "./environment.js"
+import prisma from "../utils/prisma.js";
 
 const connectDB = async () => {
-    try {
-        const conn = await mongoose.connect(config.MONGODB_URI);
+  try {
+    await prisma.$connect();
+    console.log("PostgreSQL (via Prisma) connected successfully");
 
-        console.log('MongoDB connected');
-
-        mongoose.connection.on('disconnected', () => {
-            console.log('MongoDB disconnected');
-        });
-
-        process.on('SIGINT', async () => {
-            await mongoose.connection.close();
-            console.log('MongoDB connection closed through app termination');
-            process.exit(0);
-        })
-
-        return conn;
-
-    } catch (error) {
-        console.log('Error connecting MongoDB:', error);
-        process.exit(1);
-    }
-}
+    process.on("SIGINT", async () => {
+      await prisma.$disconnect();
+      console.log("Prisma disconnected through app termination");
+      process.exit(0);
+    });
+  } catch (error) {
+    console.error("Error connecting to PostgreSQL via Prisma:", error);
+    process.exit(1);
+  }
+};
 
 export default connectDB;

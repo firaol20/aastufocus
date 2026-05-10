@@ -391,7 +391,6 @@ export default function HeroSection({
             <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-r from-primary/60 to-primary/40 rounded-full opacity-80 blur-xl animate-pulse shadow-lg"></div>
             <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-gradient-to-r from-primary/50 to-primary/30 rounded-full opacity-70 blur-xl animate-float shadow-lg"></div>
             <div className="absolute top-1/2 -right-6 w-16 h-16 bg-gradient-to-r from-primary/70 to-primary/50 rounded-full opacity-70 blur-lg animate-bounce shadow-lg"></div>
-
           </motion.div>
         </div>
       </div>

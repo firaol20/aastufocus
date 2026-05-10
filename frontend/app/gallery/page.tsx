@@ -1,21 +1,105 @@
+"use client";
+
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Play, ImageIcon, Calendar } from "lucide-react";
+import { Play, ImageIcon, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import GalleryLightbox from "@/components/gallery-lightbox";
 import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
 } from "@/components/animations/motion";
-import { Banner } from "@/components/banner";
+
+const gallerySlides = [
+  { image: "/hero-section/hero-3.jpg" },
+  { image: "/hero-section/hero-4.jpg" },
+  { image: "/hero-section/hero-2.jpg" },
+];
 
 export default function GalleryPage() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % gallerySlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % gallerySlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide(
+      (prev) => (prev - 1 + gallerySlides.length) % gallerySlides.length
+    );
+  };
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <Banner title="Gallery" subTitle="Browse photos and videos from our fellowship events and activities"/>
+      {/* Hero Section */}
+      <section className="relative h-[400px] md:h-[650px] w-full flex items-center justify-center overflow-hidden">
+        {gallerySlides.map((slide, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+            }`}
+          >
+            <Image
+              src={slide.image}
+              alt="Gallery Background"
+              fill
+              className="object-cover"
+              priority={index === 0}
+            />
+            <div className="absolute inset-0 bg-[#3f125a]/70 mix-blend-multiply"></div>
+          </div>
+        ))}
+        
+        {/* Navigation Arrows */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-20"
+        >
+          <ChevronLeft className="w-12 h-12 md:w-16 md:h-16 font-light stroke-1" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-20"
+        >
+          <ChevronRight className="w-12 h-12 md:w-16 md:h-16 font-light stroke-1" />
+        </button>
+        
+        {/* Slide Indicators */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
+          {gallerySlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                index === currentSlide
+                  ? "bg-white w-8"
+                  : "bg-white/50 hover:bg-white/80"
+              }`}
+            />
+          ))}
+        </div>
+        
+        <div className="relative z-20 text-center text-white px-4 max-w-3xl mx-auto mt-10 md:mt-16">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-[0.2em] mb-6 uppercase leading-tight scale-y-110">
+              GALLERY
+            </h1>
+            <p className="text-sm md:text-base lg:text-lg text-white/90 font-light tracking-wide leading-relaxed">
+              Browse photos and videos from our fellowship events and activities.
+            </p>
+          </div>
+        </div>
+      </section>
       
 
       {/* Gallery Tabs */}

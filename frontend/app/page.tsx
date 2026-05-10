@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <HeroSection/>
+      <HeroSection />
 
       {/* Welcome Message */}
       <section className="py-16  ">
@@ -103,7 +103,10 @@ export default function Home() {
 
           <div className="text-center mt-10">
             <FadeIn delay={0.4}>
-              <Button asChild className="bg-primary-gradient text-white hover:opacity-90">
+              <Button
+                asChild
+                className="bg-primary-gradient text-white hover:opacity-90"
+              >
                 <Link href="/events">View All Events</Link>
               </Button>
             </FadeIn>
@@ -229,7 +232,11 @@ export default function Home() {
             </p>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <Button asChild size="lg" className="bg-primary-gradient text-white hover:opacity-90">
+            <Button
+              asChild
+              size="lg"
+              className="bg-primary-gradient text-white hover:opacity-90"
+            >
               <Link href="/join-us">Join AASTU FOCUS Today</Link>
             </Button>
           </FadeIn>

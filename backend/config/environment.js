@@ -1,14 +1,24 @@
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const jwtSecret = process.env.JWT_SECRET || process.env.JWT_secret_key;
+
+if (process.env.NODE_ENV === "development") {
+  console.log(`🔑 JWT Secret loaded: ${jwtSecret ? jwtSecret.substring(0, 4) + "..." : "NOT FOUND (using default)"}`);
+}
+
 const jwtExpiresIn = process.env.JWT_EXPIRES_IN || process.env.JWT_EXPIRES;
 
 const config = {
   NODE_ENV: process.env.NODE_ENV || "development",
   PORT: process.env.PORT || 5000,
-  MONGODB_URI: process.env.MONGODB_URI,
+  DATABASE_URL: process.env.DATABASE_URL,
   JWT_SECRET:
     jwtSecret ||
     (process.env.NODE_ENV === "development" ? "development_secret" : null),
@@ -26,9 +36,17 @@ const config = {
   PASSWORD_MIN_LENGTH: parseInt(process.env.PASSWORD_MIN_LENGTH) || 8,
   MAX_LOGIN_ATTEMPTS: parseInt(process.env.MAX_LOGIN_ATTEMPTS) || 5,
   LOCKOUT_TIME: parseInt(process.env.LOCKOUT_TIME) || 15,
+  // Email Configuration
+  EMAIL: {
+    HOST: process.env.EMAIL_HOST,
+    PORT: parseInt(process.env.EMAIL_PORT) || 587,
+    USER: process.env.EMAIL_USERNAME,
+    PASS: process.env.EMAIL_PASSWORD,
+    ENCRYPTION: process.env.EMAIL_ENCRYPTION || "tls",
+  },
 };
 
-const requiredEnvVars = ["MONGODB_URI", "JWT_SECRET", "SESSION_SECRET"];
+const requiredEnvVars = ["DATABASE_URL", "JWT_SECRET", "SESSION_SECRET"];
 // Add OAuth validation when in production
 const optionalEnvVars = ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"];
 for (const envVar of requiredEnvVars) {

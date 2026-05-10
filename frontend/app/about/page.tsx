@@ -15,9 +15,30 @@ import { Banner } from "@/components/banner";
 export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <Banner title="About Us" subTitle="Learn more about AASTU FOCUS Fellowship, our mission, vision, and
-              the people who make it happen."/>
+      {/* Hero Section */}
+      <section className="relative h-[400px] md:h-[500px] w-full flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/hero-section/hero-2.jpg"
+            alt="About Us Background"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-[#3f125a]/70 mix-blend-multiply"></div>
+        </div>
+        
+        <div className="relative z-20 text-center text-white px-4 max-w-3xl mx-auto mt-10 md:mt-16">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-[0.2em] mb-6 uppercase leading-tight scale-y-110">
+              ABOUT US
+            </h1>
+            <p className="text-sm md:text-base lg:text-lg text-white/90 font-light tracking-wide leading-relaxed">
+              Learn more about AASTU FOCUS Fellowship, our mission, vision, and the people who make it happen.
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Mission and Vision */}
       <section className="py-16 px-10">
