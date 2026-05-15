@@ -75,9 +75,8 @@ export default function EventsPage() {
         {heroSlides.map((slide, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+              }`}
           >
             <Image
               src={slide.image}
@@ -127,11 +126,10 @@ export default function EventsPage() {
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentSlide
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentSlide
                     ? "bg-white w-8"
                     : "bg-white/40 hover:bg-white/80"
-                }`}
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -204,11 +202,10 @@ export default function EventsPage() {
                   {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
                     <div
                       key={day}
-                      className={`text-center p-2 rounded-md ${
-                        [3, 10, 17, 24, 25].includes(day)
+                      className={`text-center p-2 rounded-md ${[3, 10, 17, 24, 25].includes(day)
                           ? "bg-primary/10 font-medium cursor-pointer hover:bg-primary/20"
                           : ""
-                      }`}
+                        }`}
                     >
                       {day}
                     </div>
@@ -231,40 +228,6 @@ export default function EventsPage() {
         </div>
       </section>
 
-      {/* Event Categories */}
-      <section className="py-16 px-10 bg-muted">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Event Categories</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Explore different types of events we host throughout the year
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <CategoryCard
-              title="Bible Studies"
-              description="Weekly gatherings to study God's word and grow in faith together."
-              imageSrc="/bible.jpg"
-            />
-            <CategoryCard
-              title="Worship Nights"
-              description="Evenings of praise, worship, and spiritual renewal."
-              imageSrc="/bible.jpg"
-            />
-            <CategoryCard
-              title="Community Service"
-              description="Opportunities to serve our campus and local community."
-              imageSrc="/bible.jpg"
-            />
-            <CategoryCard
-              title="Retreats & Conferences"
-              description="Special events for deeper fellowship and spiritual growth."
-              imageSrc="/bible.jpg"
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Event Registration */}
       <section className="py-16 px-10">

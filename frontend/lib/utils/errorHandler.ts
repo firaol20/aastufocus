@@ -1,5 +1,5 @@
 import { toast } from "../../hooks/use-toast";
-import { ApiError } from "../api/index";
+import type { ApiError } from "../api/index";
 
 // Error Types
 export enum ErrorType {
@@ -126,6 +126,16 @@ export class ErrorHandler {
     ],
   ]);
 
+  // Type guard for ApiError
+  private static isApiError(error: Error | ApiError): error is ApiError {
+    return (
+      typeof error === "object" &&
+      error !== null &&
+      "statusCode" in error &&
+      typeof (error as ApiError).statusCode === "number"
+    );
+  }
+
   // Handle API Errors
   static handleApiError(error: ApiError | Error, context?: string): void {
     const errorKey = this.getErrorKey(error);
@@ -135,8 +145,7 @@ export class ErrorHandler {
     if (config.logError) {
       console.error(`[${context || "API"}] Error:`, {
         message: error.message,
-        statusCode: error instanceof ApiError ? error.statusCode : undefined,
-        stack: error.stack,
+        statusCode: this.isApiError(error) ? error.statusCode : undefined,
         timestamp: new Date().toISOString(),
       });
     }
@@ -207,7 +216,7 @@ export class ErrorHandler {
 
   // Utility Methods
   private static getErrorKey(error: ApiError | Error): string {
-    if (error instanceof ApiError) {
+    if (this.isApiError(error)) {
       return error.statusCode.toString();
     }
 

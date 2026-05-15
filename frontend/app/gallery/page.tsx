@@ -121,7 +121,7 @@ export default function GalleryPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen">
       {/* HERO SECTION */}
       <section className="relative h-[450px] md:h-[680px] w-full flex items-center justify-center overflow-hidden">
         {gallerySlides.map((slide, index) => (
@@ -362,7 +362,7 @@ export default function GalleryPage() {
       </section>
 
       {/* SUBMIT SECTION */}
-      <section className="py-20 px-4 md:px-10 bg-background">
+      <section className="py-20 px-4 md:px-10">
         <div className="container mx-auto px-4 text-center">
           <FadeIn>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/10 mb-6">

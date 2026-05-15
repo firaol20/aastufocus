@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { ErrorHandler, ErrorType, ErrorSeverity } from "./errorHandler";
-import { ApiError } from "../api/index";
+import type { ApiError } from "../api/index";
 
 // Error Boundary Props
 interface ErrorBoundaryProps {
@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<
     // Show error toast
     ErrorHandler.showErrorToast(
       "Something went wrong",
-      "An unexpected error occurred. Please refresh the page."
+      "An unexpected error occurred. Please refresh the page.",
     );
   }
 
@@ -90,7 +90,7 @@ export class ErrorBoundary extends Component<
 // Error Boundary HOC
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
-  errorBoundaryProps?: Omit<ErrorBoundaryProps, "children">
+  errorBoundaryProps?: Omit<ErrorBoundaryProps, "children">,
 ) {
   const WrappedComponent = (props: P) => (
     <ErrorBoundary {...errorBoundaryProps}>
@@ -106,18 +106,18 @@ export function withErrorBoundary<P extends object>(
 
 // Error Context
 interface ErrorContextType {
-  error: Error | null;
-  setError: (error: Error | null) => void;
+  error: Error | ApiError | null;
+  setError: (error: Error | ApiError | null) => void;
   clearError: () => void;
 }
 
 const ErrorContext = React.createContext<ErrorContextType | undefined>(
-  undefined
+  undefined,
 );
 
 // Error Provider
 export function ErrorProvider({ children }: { children: ReactNode }) {
-  const [error, setError] = React.useState<Error | null>(null);
+  const [error, setError] = React.useState<Error | ApiError | null>(null);
 
   const clearError = React.useCallback(() => {
     setError(null);
@@ -129,7 +129,7 @@ export function ErrorProvider({ children }: { children: ReactNode }) {
       setError,
       clearError,
     }),
-    [error, clearError]
+    [error, clearError],
   );
 
   return (
@@ -157,7 +157,7 @@ export function useAsyncError() {
       setError(error);
       ErrorHandler.handleApiError(error, "Component");
     },
-    [setError]
+    [setError],
   );
 
   return { handleAsyncError };
@@ -165,7 +165,7 @@ export function useAsyncError() {
 
 // Error Display Component
 interface ErrorDisplayProps {
-  error?: Error | null;
+  error?: Error | ApiError | null;
   fallback?: ReactNode;
   className?: string;
 }

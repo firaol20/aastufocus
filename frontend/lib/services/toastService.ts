@@ -13,16 +13,24 @@ export class ToastService {
     const { title, description, type = "info", duration = 5000 } = message;
 
     type ToastType = "success" | "error" | "warning" | "info";
-    const variantMap: Record<ToastType, "success" | "destructive" | "warning" | "default"> = {
+    const variantMap: Record<
+      ToastType,
+      "success" | "destructive" | "warning" | "default"
+    > = {
       success: "success",
       error: "destructive",
       warning: "warning",
       info: "default",
     };
 
-      const safeType: ToastType = ["success", "error", "warning", "info"].includes(type)
-    ? (type as ToastType)
-    : "info";
+    const safeType: ToastType = [
+      "success",
+      "error",
+      "warning",
+      "info",
+    ].includes(type)
+      ? (type as ToastType)
+      : "info";
 
     const variant = variantMap[safeType];
 
@@ -60,5 +68,19 @@ export class ToastService {
       description: message,
       type: "info",
     });
+  }
+
+  static networkError(
+    message = "Network error. Please check your connection and try again.",
+  ) {
+    return this.error(message, "Network Error");
+  }
+
+  static serverError(message = "Server error. Please try again later.") {
+    return this.error(message, "Server Error");
+  }
+
+  static validationError(message: string) {
+    return this.warning(message, "Validation Error");
   }
 }

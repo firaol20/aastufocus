@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,8 +11,6 @@ import {
   StaggerItem,
   CountUp,
 } from "@/components/animations/motion";
-import AboutPageMap from "@/components/about-page-map";
-import { Banner } from "@/components/banner";
 
 export default function AboutPage() {
   return (
@@ -27,7 +27,7 @@ export default function AboutPage() {
           />
           <div className="absolute inset-0 bg-[#3f125a]/70 mix-blend-multiply"></div>
         </div>
-        
+
         <div className="relative z-20 text-center text-white px-4 max-w-3xl mx-auto mt-10 md:mt-16">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-[0.2em] mb-6 uppercase leading-tight scale-y-110">
@@ -81,7 +81,7 @@ export default function AboutPage() {
             <FadeIn direction="left">
               <div className="relative h-[400px] rounded-lg overflow-hidden">
                 <Image
-                  src="/worship.jpg"
+                  src="/events.jpg"
                   alt="Fellowship gathering"
                   fill
                   className="object-cover"
@@ -97,33 +97,27 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="p-4">
-              <CountUp
-                end={100}
-                className="text-4xl md:text-5xl font-bold mb-2"
-                suffix="+"
-              />
+              <div className="text-4xl md:text-5xl font-bold mb-2">
+                <CountUp end={100} suffix="+" />
+              </div>
               <p className="text-primary-foreground/80">Active Members</p>
             </div>
             <div className="p-4">
-              <CountUp
-                end={6}
-                className="text-4xl md:text-5xl font-bold mb-2"
-              />
+              <div className="text-4xl md:text-5xl font-bold mb-2">
+                <CountUp end={6} />
+              </div>
               <p className="text-primary-foreground/80">Ministry Teams</p>
             </div>
             <div className="p-4">
-              <CountUp
-                end={52}
-                className="text-4xl md:text-5xl font-bold mb-2"
-                suffix="+"
-              />
+              <div className="text-4xl md:text-5xl font-bold mb-2">
+                <CountUp end={52} suffix="+" />
+              </div>
               <p className="text-primary-foreground/80">Events Per Year</p>
             </div>
             <div className="p-4">
-              <CountUp
-                end={9}
-                className="text-4xl md:text-5xl font-bold mb-2"
-              />
+              <div className="text-4xl md:text-5xl font-bold mb-2">
+                <CountUp end={14} />
+              </div>
               <p className="text-primary-foreground/80">Years of Impact</p>
             </div>
           </div>
@@ -304,65 +298,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Location Map */}
-      <section className="py-16 bg-muted">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <FadeIn>
-              <h2 className="text-3xl font-bold mb-4">Find Us on Campus</h2>
-            </FadeIn>
-            <FadeIn delay={0.1}>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                We're located in the Student Center, Room 105 at Addis Ababa
-                Science and Technology University
-              </p>
-            </FadeIn>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <FadeIn delay={0.2}>
-              <AboutPageMap
-                latitude={8.891263711200805}
-                longitude={38.799113629416546}
-                markerTitle="AASTU FOCUS Fellowship - Student Center, Room 105"
-              />
-            </FadeIn>
-
-            <div className="mt-8 bg-card rounded-lg p-6 border">
-              <h3 className="font-bold text-lg mb-4">Contact Information</h3>
-              <div className="space-y-2">
-                <p>
-                  <span className="font-medium">Address:</span> Student Center,
-                  Room 105, Addis Ababa Science and Technology University
-                </p>
-                <p>
-                  <span className="font-medium">Email:</span>{" "}
-                  <a
-                    href="mailto:contact@aastufocus.org"
-                    className="text-primary hover:underline"
-                  >
-                    contact@aastufocus.org
-                  </a>
-                </p>
-                <p>
-                  <span className="font-medium">Phone:</span>{" "}
-                  <a
-                    href="tel:+251911234567"
-                    className="text-primary hover:underline"
-                  >
-                    +251 911 234 567
-                  </a>
-                </p>
-                <p>
-                  <span className="font-medium">Office Hours:</span> Monday -
-                  Friday: 10:00 AM - 4:00 PM
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Leadership Team */}
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -370,7 +305,7 @@ export default function AboutPage() {
             <FadeIn>
               <h2 className="text-3xl font-bold mb-4">Our Leadership Team</h2>
             </FadeIn>
-            <FadeIn delay={0.1}>
+            <FadeIn>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Meet the dedicated individuals who guide our fellowship
               </p>
@@ -381,114 +316,90 @@ export default function AboutPage() {
             <div className="flex justify-center mb-8">
               <TabsList>
                 <TabsTrigger value="executive">Main Leader</TabsTrigger>
-                <TabsTrigger value="ministry">Team Leaders</TabsTrigger>
-                <TabsTrigger value="advisors">Faculty Advisors</TabsTrigger>
               </TabsList>
             </div>
 
             <TabsContent value="executive" className="space-y-8 px-10">
               <StaggerContainer>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
                   <StaggerItem>
                     <LeaderCard
                       name="Abdi Takele"
-                      role="President"
-                      bio="Computer Science, 4th Year. David has been with FOCUS since his freshman year and is passionate about building community."
-                      imageSrc="/worship.jpg"
+                      role="Ex Leader"
+                      bio="God made Him who had no sin to be sin for us, so that in Him we might become the righteousness of God.— 2 Corinthians 5:21."
+                      imageSrc="/Teams/Hopa.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
                     <LeaderCard
                       name="Hayu Rabira"
-                      role="Vice President"
-                      bio="Electrical Engineering, 3rd Year. Sarah oversees our ministry teams and helps coordinate major events."
-                      imageSrc="/worship.jpg"
+                      role="Ex Leader"
+                      bio="“Trust in the Lord with all your heart,and lean not on your own understanding;in all your ways acknowledge Him,and He shall direct your paths.” — Proverbs 3:5–6"
+                      imageSrc="/Teams/hayu.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
                     <LeaderCard
                       name="Naol Wandimu"
-                      role="Secretary"
-                      bio="Business Administration, 3rd Year. Michael manages communications and keeps our fellowship organized."
-                      imageSrc="/worship.jpg"
+                      role="Ex Leader"
+                      bio="For God so loved the world that He gave His only begotten Son, that whoever believes in Him should not perish but have everlasting life.”— John 3:16"
+                      imageSrc="/Teams/naol.png"
                     />
                   </StaggerItem>
                   <StaggerItem>
                     <LeaderCard
                       name="Moti Tesfaye"
-                      role="Treasurer"
-                      bio="Accounting, 4th Year. Ruth manages our finances and fundraising efforts with integrity and skill."
-                      imageSrc="/worship.jpg"
-                    />
-                  </StaggerItem>
-                </div>
-              </StaggerContainer>
-            </TabsContent>
-
-            <TabsContent value="ministry" className="space-y-8">
-              <StaggerContainer>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <StaggerItem>
-                    <LeaderCard
-                      name="Daniel Haile"
-                      role="Worship Team Leader"
-                      bio="Music, 3rd Year. Daniel coordinates our worship team and helps create meaningful worship experiences."
-                      imageSrc="/worship.jpg"
+                      role="Main Leader"
+                      bio="“Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.”— Joshua 1:9"
+                      imageSrc="/Teams/kingo.png"
                     />
                   </StaggerItem>
                   <StaggerItem>
                     <LeaderCard
-                      name="Bethel Tadesse"
-                      role="Outreach Coordinator"
-                      bio="Sociology, 4th Year. Bethel organizes community service projects and campus outreach initiatives."
-                      imageSrc="/worship.jpg"
+                      name="Firaol Bashada"
+                      role="Main Leader"
+                      bio="“Who among the gods is like You, Lord? Who is like You—majestic in holiness, awesome in glory, working wonders?” — Exodus 15:11"
+                      imageSrc="/Teams/fira.png"
                     />
                   </StaggerItem>
                   <StaggerItem>
                     <LeaderCard
-                      name="Samuel Bekele"
-                      role="Bible Study Coordinator"
-                      bio="Theology, 3rd Year. Samuel plans our Bible study curriculum and trains small group leaders."
-                      imageSrc="/worship.jpg"
+                      name="Amanuel legese"
+                      role="Main Leader"
+                      bio="“For in the gospel the righteousness of God is revealed — a righteousness that is by faith from first to last.”— Romans 1:17"
+                      imageSrc="/Teams/Amo.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
                     <LeaderCard
-                      name="Hanna Mekonnen"
-                      role="Prayer Team Leader"
-                      bio="Psychology, 2nd Year. Hanna coordinates our prayer ministry and weekly prayer gatherings."
-                      imageSrc="/worship.jpg"
-                    />
-                  </StaggerItem>
-                </div>
-              </StaggerContainer>
-            </TabsContent>
-
-            <TabsContent value="advisors" className="space-y-8">
-              <StaggerContainer>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-3xl mx-auto">
-                  <StaggerItem>
-                    <LeaderCard
-                      name="Dr. Solomon Desta"
-                      role="Faculty Advisor"
-                      bio="Professor of Engineering. Dr. Desta has been advising FOCUS since 2017 and provides wisdom and guidance."
-                      imageSrc="/worship.jpg"
+                      name="Gifti Tesfaye"
+                      role="Main Leader"
+                      bio="“Holy, holy, holy is the Lord Almighty;the whole earth is full of His glory.”— Isaiah 6:3"
+                      imageSrc="/Teams/gifti.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
                     <LeaderCard
-                      name="Prof. Meseret Alemu"
-                      role="Faculty Advisor"
-                      bio="Associate Professor of Philosophy. Prof. Alemu helps students integrate faith and academic pursuits."
-                      imageSrc="/worship.jpg"
+                      name="Elsabet Birhanu"
+                      role="Main Leader"
+                      bio="God made Him who had no sin to be sin for us, so that in Him we might become the righteousness of God.”— 2 Corinthians 5:21"
+                      imageSrc="/Teams/Elsabet.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
                     <LeaderCard
-                      name="Pastor Yonas Kebede"
-                      role="Spiritual Mentor"
-                      bio="Campus Minister. Pastor Yonas provides spiritual guidance and mentorship to our leadership team."
-                      imageSrc="/worship.jpg"
+                      name="Yosef Shibiru"
+                      role="Main Leader"
+                      bio="“Blessed is the one who trusts in the Lord, whose confidence is in Him.”— Jeremiah 17:7"
+                      imageSrc="/Teams/yosef.jpg"
+                    />
+                  </StaggerItem>
+                  <StaggerItem>
+                    <LeaderCard
+                      name="Hunduma Alamayo"
+                      role="Main Leader"
+                      bio="“There is no one holy like the Lord; there is no one besides You.”— 1 Samuel 2:2"
+                      imageSrc="/Teams/Hunduma.jpg"
                     />
                   </StaggerItem>
                 </div>
@@ -539,7 +450,7 @@ function LeaderCard({
   imageSrc: string;
 }) {
   return (
-    <Card className="overflow-hidden h-full transition-shadow duration-300 hover:shadow-lg">
+    <Card className="overflow-hidden h-auto min-w-[320px] max-w-[360px] max-h-[420px] transition-shadow duration-300 hover:shadow-lg">
       <div className="aspect-square relative overflow-hidden">
         <Image
           src={imageSrc || "/placeholder.svg"}

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Facebook, Twitter, Youtube } from "lucide-react";
-import { FaTelegramPlane, FaTiktok } from "react-icons/fa";
+import { Instagram } from "lucide-react";
+import { FaTiktok } from "react-icons/fa";
 
 export function Footer() {
   return (
@@ -21,38 +21,21 @@ export function Footer() {
             <div className="flex space-x-4">
               <Link
                 target="_blank"
-                href="https://www.facebook.com/fstufocus"
+                rel="noopener noreferrer"
+                href="https://www.instagram.com/aastufocus?igsh=MWw0MTlyMW13OWNobg=="
                 className="text-muted-foreground hover:text-primary"
               >
-                <Facebook className="h-5 w-5" />
-                <span className="sr-only">Facebook</span>
+                <Instagram className="h-5 w-5" />
+                <span className="sr-only">Instagram</span>
               </Link>
               <Link
                 target="_blank"
                 rel="noopener noreferrer"
-                href="https://t.me/fstufocus"
+                href="https://www.tiktok.com/@aastu_focus?_r=1&_t=ZS-96NJnRWw6tQ"
                 className="text-muted-foreground hover:text-primary"
               >
-                <FaTelegramPlane className="h-5 w-5" />
-                <span className="sr-only">Telegram</span>
-              </Link>
-              <Link
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://vm.tiktok.com/ZMBmNFJ8b/"
-                className="text-muted-foreground hover:text-primary"
-              >
-                <FaTiktok className="h-4 w-4" />
+                <FaTiktok className="h-5 w-5" />
                 <span className="sr-only">TikTok</span>
-              </Link>
-              <Link
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://youtube.com/@aastufocusofficial9025?si=_lFJUbo27Gmaeu2y"
-                className="text-muted-foreground hover:text-primary"
-              >
-                <Youtube className="h-5 w-5" />
-                <span className="sr-only">YouTube</span>
               </Link>
             </div>
           </div>
