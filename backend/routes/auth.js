@@ -80,8 +80,8 @@ router.get(
       };
 
       res
-        .cookie('access_token', access, { ...commonCookie, maxAge: 15 * 60 * 1000 })
-        .cookie('refresh_token', refresh, { ...commonCookie, maxAge: 30 * 24 * 60 * 60 * 1000 })
+        .cookie('access_token', access, { ...commonCookie, maxAge: 365 * 24 * 60 * 60 * 1000 })
+        .cookie('refresh_token', refresh, { ...commonCookie, maxAge: 365 * 24 * 60 * 60 * 1000 })
         .redirect(`${process.env.CLIENT_URL || "http://localhost:3000"}/auth/callback?auth=success`);
     } catch (error) {
       console.error('Google auth callback error:', error);

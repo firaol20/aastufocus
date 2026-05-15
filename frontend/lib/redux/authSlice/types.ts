@@ -36,4 +36,11 @@ export interface RegisterPayload {
   yearOfStudy: string;
   phone: string;
 }
+export interface VerifyEmailPayload {
+  email: string;
+  otp: string;
+}
 
+export interface ResendVerificationPayload {
+  email: string;
+}

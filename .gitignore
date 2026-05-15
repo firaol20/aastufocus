@@ -173,3 +173,10 @@ temp/
 ehthumbs.db
 Thumbs.db
 desktop.ini
+
+
+# Frontend specific
+
+frontend/.next/
+frontend/node_modules/
+frontend/.pnp/

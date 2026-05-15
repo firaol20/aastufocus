@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { FadeIn } from "@/components/animations/motion";
 import { Banner } from "@/components/banner";
+import GalleryLightbox from "@/components/gallery-lightbox";
 
 export default function TeamsPage() {
   return (
@@ -62,43 +63,43 @@ export default function TeamsPage() {
                   className="flex items-center gap-2"
                 >
                   <Music className="h-4 w-4" />
-                  Worship
+                  Eleos Choir
                 </TabsTrigger>
                 <TabsTrigger
                   value="outreach"
                   className="flex items-center gap-2"
                 >
                   <Heart className="h-4 w-4" />
-                  Outreach
+                  Action and Prayer
                 </TabsTrigger>
                 <TabsTrigger
-                  value="bible-study"
+                  value="bible-study-coordinator"
                   className="flex items-center gap-2"
                 >
                   <BookOpen className="h-4 w-4" />
-                  Bible Study
+                  Bible Study Cordinator
                 </TabsTrigger>
-                <TabsTrigger value="prayer" className="flex items-center gap-2">
-                  <MessageCircle className="h-4 w-4" />
-                  Prayer
+                <TabsTrigger value="Advisory" className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  Tumbi Team
                 </TabsTrigger>
                 <TabsTrigger
-                  value="welcome"
+                  value="Helpers"
                   className="flex items-center gap-2"
                 >
                   <Users className="h-4 w-4" />
-                  Welcome
+                  Ebenims Team
                 </TabsTrigger>
                 <TabsTrigger value="media" className="flex items-center gap-2">
                   <Megaphone className="h-4 w-4" />
-                  Media
+                  Salem Media
                 </TabsTrigger>
               </TabsList>
             </div>
 
             <TabsContent value="worship" className="space-y-8 pt-16 lg:pt-2">
               <TeamSection
-                name="Worship Team"
+                name="Eleos Choir"
                 description="Our worship team leads the fellowship in praise and worship during our gatherings, creating an atmosphere for encountering God."
                 responsibilities={[
                   "Lead worship during weekly gatherings and special events",
@@ -112,15 +113,15 @@ export default function TeamsPage() {
                   "Commitment to regular practice and spiritual growth",
                   "Ability to work well in a team setting",
                 ]}
-                imageSrc="/worship.jpg"
-                members={worshipTeamMembers}
+                imageSrc="/teams/eleos_team_leaders.jpg"
+                members={EleosTeamLeaders}
               />
             </TabsContent>
 
             <TabsContent value="outreach" className="space-y-8 pt-16 lg:pt-2">
               <TeamSection
-                name="Outreach Team"
-                description="The outreach team coordinates our community service projects and evangelistic efforts, helping us share God's love with our campus and community."
+                name="Action and Prayer"
+                description="The Action and Prayer team coordinates our community service projects and evangelistic efforts, helping us share God's love with our campus and community."
                 responsibilities={[
                   "Plan and organize community service projects",
                   "Coordinate campus outreach initiatives",
@@ -133,18 +134,18 @@ export default function TeamsPage() {
                   "Heart for the community and campus",
                   "Ability to mobilize and inspire others to serve",
                 ]}
-                imageSrc="/worship.jpg"
-                members={outreachTeamMembers}
+                imageSrc="/teams/actionandprayer_team_leaders.jpg"
+                members={ActionandPrayerTeamLeaders}
               />
             </TabsContent>
 
             <TabsContent
-              value="bible-study"
+              value="bible-study-coordinator"
               className="space-y-8 pt-16 lg:pt-2"
             >
               <TeamSection
-                name="Bible Study Team"
-                description="The Bible study team develops and leads our Bible studies, helping members grow in their understanding of Scripture and application to daily life."
+                name="Bible Study Coordinator"
+                description="The Bible study coordinator team develops and leads our Bible studies, helping members grow in their understanding of Scripture and application to daily life."
                 responsibilities={[
                   "Develop Bible study curriculum",
                   "Lead small group discussions",
@@ -157,36 +158,36 @@ export default function TeamsPage() {
                   "Commitment to personal Bible study",
                   "Heart for helping others grow spiritually",
                 ]}
-                imageSrc="/worship.jpg"
-                members={bibleStudyTeamMembers}
+                imageSrc="/teams/bsc_team_leaders.jpg"
+                members={BibleStudyCoordinator}
               />
             </TabsContent>
 
-            <TabsContent value="prayer" className="space-y-8 pt-16 lg:pt-2">
+            <TabsContent value="Advisory" className="space-y-8 pt-16 lg:pt-2">
               <TeamSection
-                name="Prayer Team"
-                description="The prayer team leads our prayer initiatives, interceding for our campus, community, and fellowship members."
+                name="Tumbi Team"
+                description="The Tumbi team is a pillar of our fellowship, it helps student with their academical life, spiritual life and also give them advice on living a Godly life."
                 responsibilities={[
-                  "Lead weekly prayer gatherings",
-                  "Coordinate prayer chains and prayer requests",
-                  "Pray for fellowship members and campus needs",
-                  "Teach on prayer and its importance",
+                  "Meet with students and listen to their concerns",
+                  "Give them advice on how to live a Godly life",
+                  "Pray for students and their needs",
+                  "Support students Academically and Spiritaully",
                 ]}
                 requirements={[
-                  "Commitment to regular prayer",
-                  "Heart for intercession",
-                  "Ability to lead others in prayer",
-                  "Sensitivity to the Holy Spirit",
+                  "Must be a mature undergraduate student",
+                  "Must be a member of the fellowship",
+                  "Must have a teachable spirit",
+                  "Must be willing to learn and grow spiritually",
                 ]}
-                imageSrc="/worship.jpg"
-                members={prayerTeamMembers}
+                imageSrc="/teams/tumbi_team_leaders.jpg"
+                members={TumbiTeamLeaders}
               />
             </TabsContent>
 
-            <TabsContent value="welcome" className="space-y-8 pt-16 lg:pt-2">
+            <TabsContent value="Helpers" className="space-y-8 pt-16 lg:pt-2">
               <TeamSection
-                name="Welcome Team"
-                description="The welcome team ensures that everyone who attends our events feels welcomed, connected, and included in our fellowship community."
+                name="Ebenims Team"
+                description="The Ebenims team ensures that everyone who attends our events feels welcomed, connected, and included in our fellowship community."
                 responsibilities={[
                   "Greet newcomers at events and gatherings",
                   "Follow up with first-time visitors",
@@ -199,15 +200,15 @@ export default function TeamsPage() {
                   "Good communication skills",
                   "Reliability and commitment to serving",
                 ]}
-                imageSrc="/worship.jpg"
-                members={welcomeTeamMembers}
+                imageSrc="/teams/ebenims_team_leaders.jpg"
+                members={EbenimsTeamLeader}
               />
             </TabsContent>
 
             <TabsContent value="media" className="space-y-8 pt-16 lg:pt-2">
               <TeamSection
-                name="Media Team"
-                description="The media team handles our online presence, photography, videography, and technical needs for events and gatherings."
+                name="Salem Media"
+                description="The Salem Media team handles our online presence, photography, videography, and technical needs for events and gatherings."
                 responsibilities={[
                   "Manage social media accounts and website",
                   "Capture photos and videos at events",
@@ -220,8 +221,8 @@ export default function TeamsPage() {
                   "Reliability and commitment",
                   "Understanding of effective communication",
                 ]}
-                imageSrc="/worship.jpg"
-                members={mediaTeamMembers}
+                imageSrc="/teams/salem_meadia_leaders.png"
+                members={SalemMediaLeaders}
               />
             </TabsContent>
           </Tabs>
@@ -299,7 +300,7 @@ export default function TeamsPage() {
             </div>
             <div className="relative h-[500px] rounded-lg overflow-hidden">
               <Image
-                src="/worship.jpg"
+                src="/teams/join_our_teams.jpg"
                 alt="Team members serving together"
                 fill
                 className="object-cover"
@@ -477,14 +478,21 @@ function TeamSection({
           </div>
         </div>
 
-        <div className="relative h-[300px] md:h-[400px] rounded-lg overflow-hidden">
-          <Image
-            src={imageSrc || "/worship.jpg"}
-            alt={name}
-            fill
-            className="object-cover"
-          />
-        </div>
+        <GalleryLightbox images={[imageSrc]} initialIndex={0}>
+          <div className="relative h-[300px] md:h-[400px] rounded-lg overflow-hidden cursor-pointer group">
+            <Image
+              src={imageSrc || "/worship.jpg"}
+              alt={name}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-3">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </div>
+        </GalleryLightbox>
       </div>
 
       <div>
@@ -492,14 +500,16 @@ function TeamSection({
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {members.map((member, index) => (
             <div key={index} className="text-center">
-              <div className="relative w-20 h-20 mx-auto rounded-full overflow-hidden mb-2">
-                <Image
-                  src={member.avatar || "/worship.jpg"}
-                  alt={member.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+              <GalleryLightbox images={members.map(m => m.avatar || "/worship.jpg")} initialIndex={index}>
+                <div className="relative w-20 h-20 mx-auto rounded-full overflow-hidden mb-2 cursor-pointer group ring-2 ring-transparent hover:ring-primary transition-all">
+                  <Image
+                    src={member.avatar || "/worship.jpg"}
+                    alt={member.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+              </GalleryLightbox>
               <p className="font-medium text-sm">{member.name}</p>
               <p className="text-xs text-muted-foreground">{member.role}</p>
             </div>
@@ -511,53 +521,55 @@ function TeamSection({
 }
 
 // Sample data
-const worshipTeamMembers = [
-  { name: "Daniel Haile", role: "Team Leader", avatar: "/worship.jpg" },
-  { name: "Abigail Teshome", role: "Vocalist", avatar: "/worship.jpg" },
-  { name: "Nathan Girma", role: "Guitarist", avatar: "/worship.jpg" },
-  { name: "Lydia Bekele", role: "Pianist", avatar: "/worship.jpg" },
-  { name: "Joshua Tadesse", role: "Drummer", avatar: "/worship.jpg" },
+const EleosTeamLeaders = [
+  { name: "Mootii", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Ayantu", role: "Ex Leader", avatar: "/worship.jpg" },
+  { name: "Abdi", role: "Ex Leader", avatar: "/worship.jpg" },
+  { name: "Kena", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Sanyi", role: "Current Leader", avatar: "/worship.jpg" },
 ];
 
-const outreachTeamMembers = [
-  { name: "Bethel Tadesse", role: "Coordinator", avatar: "/worship.jpg" },
-  { name: "Caleb Alemu", role: "Project Manager", avatar: "/worship.jpg" },
-  { name: "Rahel Hailu", role: "Community Liaison", avatar: "/worship.jpg" },
-  { name: "Isaac Mengistu", role: "Member", avatar: "/worship.jpg" },
+const ActionandPrayerTeamLeaders = [
+  { name: "Solomon", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Idae", role: "Ex Leader", avatar: "/worship.jpg" },
+  { name: "Olman", role: "Ex Leader", avatar: "/worship.jpg" },
+  { name: "Ebise", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Tilahun", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Sarah", role: "Current Leader", avatar: "/worship.jpg" },
 ];
 
-const bibleStudyTeamMembers = [
-  { name: "Samuel Bekele", role: "Coordinator", avatar: "/worship.jpg" },
+const BibleStudyCoordinator = [
+  { name: "Eyosias", role: "Ex Leader", avatar: "/worship.jpg" },
+  { name: "Bayisa", role: "Ex Leader", avatar: "/worship.jpg" },
+  { name: "Hundee", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Elias", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Ifaa", role: "Current Leader", avatar: "/worship.jpg" },
+];
+
+const TumbiTeamLeaders = [
+  { name: "Naol", role: "Leader", avatar: "/worship.jpg" },
+  { name: "Eyosias", role: "Leader", avatar: "/worship.jpg" },
+  { name: "Ayantu", role: "Leader", avatar: "/worship.jpg" },
+  { name: "Elsabet", role: "Leader", avatar: "/worship.jpg" },
+  { name: "Ebise", role: "Leader", avatar: "/worship.jpg" },
+];
+
+const EbenimsTeamLeader = [
+  { name: "Gabisaa", role: "Ex Leader", avatar: "/worship.jpg" },
+  { name: "Sisiyo", role: "Ex Leader", avatar: "/worship.jpg" },
+  { name: "Sanyi", role: "Ex Leader", avatar: "/worship.jpg" },
+  { name: "Tamasgen", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Beka", role: "Current Leader", avatar: "/worship.jpg" },
   {
-    name: "Deborah Yohannes",
-    role: "Small Group Leader",
+    name: "Eba",
+    role: "Current Leader",
     avatar: "/worship.jpg",
   },
-  { name: "Ezra Tesfaye", role: "Small Group Leader", avatar: "/worship.jpg" },
-  { name: "Naomi Gebre", role: "Resource Developer", avatar: "/worship.jpg" },
 ];
 
-const prayerTeamMembers = [
-  { name: "Hanna Mekonnen", role: "Team Leader", avatar: "/worship.jpg" },
-  { name: "Elias Demeke", role: "Intercessor", avatar: "/worship.jpg" },
-  { name: "Martha Assefa", role: "Intercessor", avatar: "/worship.jpg" },
-];
-
-const welcomeTeamMembers = [
-  { name: "Meron Abebe", role: "Team Leader", avatar: "/worship.jpg" },
-  { name: "Dawit Solomon", role: "Greeter", avatar: "/worship.jpg" },
-  { name: "Tigist Negash", role: "Greeter", avatar: "/worship.jpg" },
-  {
-    name: "Abel Getachew",
-    role: "Follow-up Coordinator",
-    avatar: "/worship.jpg",
-  },
-];
-
-const mediaTeamMembers = [
-  { name: "Yonas Kebede", role: "Team Leader", avatar: "/worship.jpg" },
-  { name: "Feven Tekle", role: "Photographer", avatar: "/worship.jpg" },
-  { name: "Bereket Alemayehu", role: "Videographer", avatar: "/worship.jpg" },
-  { name: "Selam Haile", role: "Social Media", avatar: "/worship.jpg" },
-  { name: "Robel Tilahun", role: "Tech Support", avatar: "/worship.jpg" },
+const SalemMediaLeaders = [
+  { name: "Kaleb", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Roba", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Elias", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Bornabek", role: "Current Leader", avatar: "/worship.jpg" },
 ];

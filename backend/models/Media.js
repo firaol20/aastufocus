@@ -3,24 +3,19 @@ import mongoose from 'mongoose';
 const mediaSchema = new mongoose.Schema({
   filename: {
     type: String,
-    required: [true, 'Filename is required'],
     trim: true
   },
   originalName: {
-    type: String,
-    required: [true, 'Original filename is required']
+    type: String
   },
   mimeType: {
-    type: String,
-    required: [true, 'MIME type is required']
+    type: String
   },
   size: {
-    type: Number,
-    required: [true, 'File size is required']
+    type: Number
   },
   path: {
-    type: String,
-    required: [true, 'File path is required']
+    type: String
   },
   url: {
     type: String,
@@ -38,7 +33,6 @@ const mediaSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: [true, 'Category is required'],
     enum: ['events', 'gallery', 'content', 'profiles', 'documents', 'other'],
     default: 'other'
   },
@@ -56,8 +50,7 @@ const mediaSchema = new mongoose.Schema({
   },
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: [true, 'Uploader is required']
+    ref: 'User'
   },
   isPublic: {
     type: Boolean,

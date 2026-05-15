@@ -1,4 +1,4 @@
-import prisma from '../utils/prisma.js';
+import User from '../models/User.js';
 import { verifyToken } from '../utils/jwtUtils.js';
 
 // Security enhancement for auth endpoints
@@ -33,15 +33,7 @@ export const verifyJWT = async (req, res, next) => {
 
     const decoded = verifyToken(token);
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true, name: true, email: true, role: true,
-        avatar: true, department: true, yearOfStudy: true,
-        phone: true, isActive: true, isVerified: true,
-        passwordChangedAt: true, createdAt: true, updatedAt: true
-      }
-    });
+    const user = await User.findById(decoded.userId).select('name email role avatar department yearOfStudy phone isActive isVerified passwordChangedAt createdAt updatedAt');
 
     if (!user) {
       return res.status(401).json({
@@ -123,10 +115,7 @@ export const optionalAuth = async (req, res, next) => {
 
     if (token) {
       const decoded = verifyToken(token);
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
-        select: { id: true, name: true, email: true, role: true, avatar: true, isActive: true, isVerified: true }
-      });
+      const user = await User.findById(decoded.userId).select('name email role avatar isActive isVerified');
       if (user && user.isActive) {
         req.user = user;
       }

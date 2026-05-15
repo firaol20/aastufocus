@@ -403,7 +403,7 @@ class AnalyticsService {
         {
           $lookup: {
             from: 'users',
-            localField: 'members',
+            localField: 'members.user',
             foreignField: '_id',
             as: 'memberDetails'
           }

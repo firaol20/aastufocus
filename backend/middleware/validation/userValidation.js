@@ -40,7 +40,7 @@ export const registerSchema = Joi.object({
       'number.max': 'Year of study cannot exceed 5'
     }),
   phone: Joi.string()
-    .pattern(/^[\+]?[1-9][\d]{0,15}$/)
+    .pattern(/^[\+]?[\d]{10,15}$/)
     .optional()
     .messages({
       'string.pattern.base': 'Please enter a valid phone number'
@@ -78,7 +78,7 @@ export const updateUserSchema = Joi.object({
     .max(5)
     .optional(),
   phone: Joi.string()
-    .pattern(/^[\+]?[1-9][\d]{0,15}$/)
+    .pattern(/^[\+]?[\d]{10,15}$/)
     .optional()
 });
 
@@ -103,7 +103,7 @@ export const adminUpdateUserSchema = Joi.object({
     .max(5)
     .optional(),
   phone: Joi.string()
-    .pattern(/^[\+]?[1-9][\d]{0,15}$/)
+    .pattern(/^[\+]?[\d]{10,15}$/)
     .optional(),
   isActive: Joi.boolean()
     .optional()

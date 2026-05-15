@@ -12,12 +12,18 @@ import {
   logout,
   setUser,
   googleRequest,
+  verifyEmailRequest,
+  verifyEmailSuccess,
+  verifyEmailFailure,
+  resendVerificationRequest,
+  resendVerificationSuccess,
+  resendVerificationFailure,
 } from "./index";
 import { UserType } from "./types";
 import { SagaIterator } from "redux-saga";
 import makeCall from "@/lib/api/makeCall";
 import { apiRoutes } from "@/lib/api";
-import { RegisterPayload, LoginPayload } from "./types";
+import { RegisterPayload, LoginPayload, VerifyEmailPayload, ResendVerificationPayload } from "./types";
 import { ToastService } from "@/lib/services/toastService";
 
 // Util for storing/removing token/user in localStorage
@@ -49,11 +55,11 @@ function* loginSaga(action: {
     }
 
     // Validate response
-    if (!response.data?.user || !response.data?.token) {
+    if (!response.data?.user || !response.data?.accessToken) {
       throw new Error("Invalid login response");
     }
 
-    const { user, token } = response.data;
+    const { user, accessToken: token } = response.data;
     yield put(loginSuccess({ user, token }));
     persistAuth(user, token);
   } catch (error: any) {
@@ -143,6 +149,54 @@ function* logoutSaga(): SagaIterator {
   }
 }
 
+// Verify Email Saga
+function* verifyEmailSaga(action: {
+  type: string;
+  payload: VerifyEmailPayload;
+}): SagaIterator {
+  try {
+    const response = yield call(makeCall, {
+      route: apiRoutes.auth.verifyEmail,
+      method: "POST",
+      body: action.payload,
+      isSecureRoute: false,
+    });
+
+    if (response.success) {
+      yield put(verifyEmailSuccess());
+      ToastService.success(response.message || "Email verified successfully!");
+    }
+  } catch (error: any) {
+    const errorMessage = error?.response?.data?.message || error.message || "Verification failed";
+    ToastService.error(errorMessage);
+    yield put(verifyEmailFailure(errorMessage));
+  }
+}
+
+// Resend Verification Saga
+function* resendVerificationSaga(action: {
+  type: string;
+  payload: ResendVerificationPayload;
+}): SagaIterator {
+  try {
+    const response = yield call(makeCall, {
+      route: apiRoutes.auth.resendVerification,
+      method: "POST",
+      body: action.payload,
+      isSecureRoute: false,
+    });
+
+    if (response.success) {
+      yield put(resendVerificationSuccess());
+      ToastService.success(response.message || "New verification code sent!");
+    }
+  } catch (error: any) {
+    const errorMessage = error?.response?.data?.message || error.message || "Failed to resend code";
+    ToastService.error(errorMessage);
+    yield put(resendVerificationFailure(errorMessage));
+  }
+}
+
 function* googleSaga(): SagaIterator {
   try {
     ToastService.success("Rediredting to Google...");
@@ -172,4 +226,6 @@ export default function* authSaga() {
   yield takeLatest(refreshTokenRequest.type, refreshTokenSaga);
   yield takeLatest(logout.type, logoutSaga);
   yield takeLatest(googleRequest.type, googleSaga);
+  yield takeLatest(verifyEmailRequest.type, verifyEmailSaga);
+  yield takeLatest(resendVerificationRequest.type, resendVerificationSaga);
 }

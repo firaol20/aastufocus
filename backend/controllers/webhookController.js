@@ -1,4 +1,4 @@
-import prisma from '../utils/prisma.js';
+import Donation from '../models/Donation.js';
 import chapaService from '../services/chapaService.js';
 import crypto from 'crypto';
 
@@ -16,7 +16,7 @@ export const handleChapaWebhook = async (req, res) => {
     }
 
     // Find donation by tx_ref (which is the donation ID)
-    const donation = await prisma.donation.findUnique({ where: { id: tx_ref } });
+    const donation = await Donation.findById(tx_ref);
     if (!donation) {
       console.error('Donation not found:', tx_ref);
       return res.status(404).send('Donation not found');
@@ -26,27 +26,19 @@ export const handleChapaWebhook = async (req, res) => {
       const verification = await chapaService.verifyPayment(transaction_id);
 
       if (verification.data.status === 'success') {
-        await prisma.donation.update({
-          where: { id: tx_ref },
-          data: {
-            paymentStatus: 'completed',
-            transactionId: transaction_id
-          }
-        });
+        donation.paymentStatus = 'completed';
+        donation.transactionId = transaction_id;
+        await donation.save();
         console.log(`Payment completed for donation ${tx_ref}`);
       } else {
-        await prisma.donation.update({
-          where: { id: tx_ref },
-          data: { paymentStatus: 'failed' }
-        });
+        donation.paymentStatus = 'failed';
+        await donation.save();
         console.log(`Payment failed for donation ${tx_ref}`);
       }
     } catch (verificationError) {
       console.error('Payment verification failed:', verificationError);
-      await prisma.donation.update({
-        where: { id: tx_ref },
-        data: { paymentStatus: 'failed' }
-      });
+      donation.paymentStatus = 'failed';
+      await donation.save();
     }
 
     res.status(200).send('OK');
@@ -77,13 +69,13 @@ export const testWebhook = async (req, res) => {
   try {
     const { donationId } = req.params;
 
-    const donation = await prisma.donation.findUnique({ where: { id: donationId } });
+    const donation = await Donation.findById(donationId);
     if (!donation) {
       return res.status(404).json({ success: false, message: 'Donation not found' });
     }
 
     const webhookPayload = {
-      tx_ref: donation.id,
+      tx_ref: donation._id.toString(),
       status: 'success',
       transaction_id: 'test_transaction_123',
       amount: donation.amount.toString(),

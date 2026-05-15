@@ -64,9 +64,9 @@ export default function SignUpForm() {
 
   useEffect(() => {
     if (isRegistered) {
-      router.push("/login");
+      router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     }
-  }, [isRegistered, router]);
+  }, [isRegistered, router, formData.email]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();

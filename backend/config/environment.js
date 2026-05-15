@@ -18,6 +18,7 @@ const jwtExpiresIn = process.env.JWT_EXPIRES_IN || process.env.JWT_EXPIRES;
 const config = {
   NODE_ENV: process.env.NODE_ENV || "development",
   PORT: process.env.PORT || 5000,
+  MONGODB_URI: process.env.MONGODB_URI,
   DATABASE_URL: process.env.DATABASE_URL,
   JWT_SECRET:
     jwtSecret ||
@@ -46,7 +47,7 @@ const config = {
   },
 };
 
-const requiredEnvVars = ["DATABASE_URL", "JWT_SECRET", "SESSION_SECRET"];
+const requiredEnvVars = ["MONGODB_URI", "JWT_SECRET", "SESSION_SECRET"];
 // Add OAuth validation when in production
 const optionalEnvVars = ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"];
 for (const envVar of requiredEnvVars) {

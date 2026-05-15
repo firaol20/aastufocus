@@ -114,6 +114,8 @@ const auth = {
   registerAdmin: `${BASE_URL}/${bases.auth}/register/admin`,
   refreshToken: `${BASE_URL}/${bases.auth}/refresh-token`,
   logout: `${BASE_URL}/${bases.auth}/logout`,
+  verifyEmail: `${BASE_URL}/${bases.auth}/verify-email`,
+  resendVerification: `${BASE_URL}/${bases.auth}/resend-verification`,
 };
 
 const users = {

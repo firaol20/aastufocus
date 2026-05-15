@@ -18,6 +18,7 @@ import mediaRoutes from "./routes/media.js";
 import contactRoutes from "./routes/contacts.js";
 import analyticsRoutes from "./routes/analytics.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import galleryRoutes from "./routes/galleryRoutes.js";
 import config from "./config/environment.js";
 import setupSwagger from "./config/swagger.js";
 
@@ -109,6 +110,7 @@ const apiRouteDefinitions = [
   { basePath: "/api/contacts", router: contactRoutes, tag: "Contacts" },
   { basePath: "/api/analytics", router: analyticsRoutes, tag: "Analytics" },
   { basePath: "/api/payment", router: paymentRoutes, tag: "Payment" },
+  { basePath: "/api/gallery", router: galleryRoutes, tag: "Gallery" },
 ];
 
 for (const routeDef of apiRouteDefinitions) {

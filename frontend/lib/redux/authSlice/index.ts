@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AuthState, RegisterPayload, UserType } from './types';
+import { AuthState, RegisterPayload, UserType, VerifyEmailPayload, ResendVerificationPayload } from './types';
 
 const initialState: AuthState = {
   user: null,
@@ -96,6 +96,34 @@ const authSlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
+    // Verify Email
+    verifyEmailRequest(state, action: PayloadAction<VerifyEmailPayload>) {
+      state.loading = true;
+      state.error = null;
+    },
+    verifyEmailSuccess(state) {
+      state.loading = false;
+      state.error = null;
+      state.isRegistered = false; // Reset registration state after successful verification
+    },
+    verifyEmailFailure(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Resend Verification
+    resendVerificationRequest(state, action: PayloadAction<ResendVerificationPayload>) {
+      state.loading = true;
+      state.error = null;
+    },
+    resendVerificationSuccess(state) {
+      state.loading = false;
+      state.error = null;
+    },
+    resendVerificationFailure(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -113,6 +141,12 @@ export const {
   setUser,
   setError,
   googleRequest,
+  verifyEmailRequest,
+  verifyEmailSuccess,
+  verifyEmailFailure,
+  resendVerificationRequest,
+  resendVerificationSuccess,
+  resendVerificationFailure,
 } = authSlice.actions;
 
 export default authSlice.reducer;

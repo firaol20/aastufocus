@@ -1,4 +1,4 @@
-import prisma from '../utils/prisma.js';
+import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/jwtUtils.js';
 import passport from '../config/passport.js';
@@ -15,9 +15,7 @@ import crypto from 'node:crypto';
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password, department, yearOfStudy, phone } = req.body;
 
-  const existingUser = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() }
-  });
+  const existingUser = await User.findOne({ email: email.toLowerCase() });
 
   if (existingUser) {
     throw new AppError('User with this email already exists', 400);
@@ -28,26 +26,20 @@ export const register = asyncHandler(async (req, res) => {
     throw new AppError(`Password validation failed: ${passwordValidation.errors.join(', ')}`, 400);
   }
 
-  // Hash password manually since we moved from Mongoose hooks
-  const salt = await bcrypt.genSalt(config.BCRYPT_SALT_ROUNDS || 12);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
   // Generate 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const verificationExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      department,
-      yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : null,
-      phone,
-      verificationToken: otp, // We store OTP in the verificationToken field
-      verificationExpires,
-      isVerified: false
-    }
+  const user = await User.create({
+    name,
+    email: email.toLowerCase(),
+    password, // Mongoose pre-save hook handles hashing
+    department,
+    yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : null,
+    phone,
+    verificationToken: otp,
+    verificationExpires,
+    isVerified: false
   });
 
   // Send verification OTP email
@@ -59,10 +51,10 @@ export const register = asyncHandler(async (req, res) => {
 
   const access = signAccessToken(user);
   const refresh = generateRefreshToken();
-  await persistRefreshToken(user.id, refresh);
+  await persistRefreshToken(user._id, refresh);
 
-  // Exclude password from response
-  const { password: _, ...userWithoutPassword } = user;
+  const userWithoutPassword = user.toObject();
+  delete userWithoutPassword.password;
 
   res.status(201).json({
     success: true,
@@ -83,26 +75,20 @@ export const verifyEmail = asyncHandler(async (req, res) => {
     throw new AppError('Email and OTP code are required', 400);
   }
 
-  const user = await prisma.user.findFirst({
-    where: {
-      email: email.toLowerCase(),
-      verificationToken: otp,
-      verificationExpires: { gt: new Date() }
-    }
+  const user = await User.findOne({
+    email: email.toLowerCase(),
+    verificationToken: otp,
+    verificationExpires: { $gt: new Date() }
   });
 
   if (!user) {
     throw new AppError('Invalid or expired verification code', 400);
   }
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      isVerified: true,
-      verificationToken: null,
-      verificationExpires: null
-    }
-  });
+  user.isVerified = true;
+  user.verificationToken = null;
+  user.verificationExpires = null;
+  await user.save();
 
   // Send welcome email after successful verification
   try {
@@ -125,9 +111,7 @@ export const resendVerificationCode = asyncHandler(async (req, res) => {
     throw new AppError('Email is required', 400);
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() }
-  });
+  const user = await User.findOne({ email: email.toLowerCase() });
 
   if (!user) {
     throw new AppError('User not found', 404);
@@ -141,13 +125,9 @@ export const resendVerificationCode = asyncHandler(async (req, res) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const verificationExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      verificationToken: otp,
-      verificationExpires
-    }
-  });
+  user.verificationToken = otp;
+  user.verificationExpires = verificationExpires;
+  await user.save();
 
   // Send verification OTP email
   try {
@@ -167,9 +147,7 @@ export const resendVerificationCode = asyncHandler(async (req, res) => {
 export const registerAdmin = asyncHandler(async (req, res) => {
   const { name, email, password, department, yearOfStudy, phone } = req.body;
 
-  const existingUser = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() }
-  });
+  const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
     throw new AppError('User with this email already exists', 400);
   }
@@ -179,29 +157,23 @@ export const registerAdmin = asyncHandler(async (req, res) => {
     throw new AppError(`Password validation failed: ${passwordValidation.errors.join(', ')}`, 400);
   }
 
-  // Hash password manually
-  const salt = await bcrypt.genSalt(config.BCRYPT_SALT_ROUNDS || 12);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      department,
-      yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : null,
-      phone,
-      role: 'admin',
-      isVerified: true
-    }
+  const user = await User.create({
+    name,
+    email: email.toLowerCase(),
+    password,
+    department,
+    yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : null,
+    phone,
+    role: 'admin',
+    isVerified: true
   });
 
   const access = signAccessToken(user);
   const refresh = generateRefreshToken();
-  await persistRefreshToken(user.id, refresh);
+  await persistRefreshToken(user._id, refresh);
 
-  // Exclude password from response
-  const { password: _, ...userWithoutPassword } = user;
+  const userWithoutPassword = user.toObject();
+  delete userWithoutPassword.password;
 
   res.status(201).json({
     success: true,
@@ -226,14 +198,12 @@ export const login = (req, res, next) => {
 
     try {
       // Update lastLogin
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { lastLogin: new Date() }
-      });
+      user.lastLogin = new Date();
+      await user.save();
 
       const access = signAccessToken(user);
       const refresh = generateRefreshToken();
-      await persistRefreshToken(user.id, refresh);
+      await persistRefreshToken(user._id, refresh);
 
       const commonCookie = {
         httpOnly: true,
@@ -242,12 +212,12 @@ export const login = (req, res, next) => {
         path: '/',
       };
 
-      // Remove password from user object
-      const { password: _, ...userWithoutPassword } = user;
+      const userWithoutPassword = user.toObject();
+      delete userWithoutPassword.password;
 
       res
-        .cookie('access_token', access, { ...commonCookie, maxAge: 15 * 60 * 1000 })
-        .cookie('refresh_token', refresh, { ...commonCookie, maxAge: 30 * 24 * 60 * 60 * 1000 })
+        .cookie('access_token', access, { ...commonCookie, maxAge: 365 * 24 * 60 * 60 * 1000 })
+        .cookie('refresh_token', refresh, { ...commonCookie, maxAge: 365 * 24 * 60 * 60 * 1000 })
         .json({
           success: true,
           message: 'Login successful',
@@ -278,7 +248,7 @@ export const refreshToken = asyncHandler(async (req, res) => {
 
   const access = signAccessToken(user);
   const newRefresh = generateRefreshToken();
-  await persistRefreshToken(user.id, newRefresh);
+  await persistRefreshToken(user._id, newRefresh);
 
   const commonCookie = {
     httpOnly: true,
@@ -288,8 +258,8 @@ export const refreshToken = asyncHandler(async (req, res) => {
   };
 
   res
-    .cookie('access_token', access, { ...commonCookie, maxAge: 15 * 60 * 1000 })
-    .cookie('refresh_token', newRefresh, { ...commonCookie, maxAge: 30 * 24 * 60 * 60 * 1000 })
+    .cookie('access_token', access, { ...commonCookie, maxAge: 365 * 24 * 60 * 60 * 1000 })
+    .cookie('refresh_token', newRefresh, { ...commonCookie, maxAge: 365 * 24 * 60 * 60 * 1000 })
     .json({ 
       success: true, 
       message: 'Token refreshed',
@@ -310,11 +280,10 @@ export const logout = (req, res) => {
 
 // get profile
 export const getProfile = asyncHandler(async (req, res) => {
-  const user = await prisma.user.findUnique({
-    where: { id: req.user.id }
-  });
+  const user = await User.findById(req.user.id);
   
-  const { password: _, ...userWithoutPassword } = user;
+  const userWithoutPassword = user.toObject();
+  delete userWithoutPassword.password;
 
   res.json({
     success: true,
@@ -328,17 +297,15 @@ export const getProfile = asyncHandler(async (req, res) => {
 export const updateProfile = asyncHandler(async (req, res) => {
   const { name, department, yearOfStudy, phone } = req.body;
 
-  const updatedUser = await prisma.user.update({
-    where: { id: req.user.id },
-    data: {
-      name,
-      department,
-      yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : undefined,
-      phone
-    }
-  });
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, {
+    name,
+    department,
+    yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : undefined,
+    phone
+  }, { new: true });
 
-  const { password: _, ...userWithoutPassword } = updatedUser;
+  const userWithoutPassword = updatedUser.toObject();
+  delete userWithoutPassword.password;
 
   res.json({
     success: true,
@@ -353,11 +320,9 @@ export const updateProfile = asyncHandler(async (req, res) => {
 export const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
-  const user = await prisma.user.findUnique({
-    where: { id: req.user.id }
-  });
+  const user = await User.findById(req.user.id).select('+password');
 
-  if (!user || !user.password || !(await bcrypt.compare(currentPassword, user.password))) {
+  if (!user || !user.password || !(await user.comparePassword(currentPassword))) {
     throw new AppError('Current password is incorrect', 400);
   }
 
@@ -366,16 +331,9 @@ export const changePassword = asyncHandler(async (req, res) => {
     throw new AppError(`Password validation failed: ${passwordValidation.errors.join(', ')}`, 400);
   }
 
-  const salt = await bcrypt.genSalt(config.BCRYPT_SALT_ROUNDS || 12);
-  const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-  await prisma.user.update({
-    where: { id: req.user.id },
-    data: {
-      password: hashedPassword,
-      passwordChangedAt: new Date()
-    }
-  });
+  user.password = newPassword;
+  user.passwordChangedAt = new Date();
+  await user.save();
 
   res.json({
     success: true,
@@ -387,32 +345,32 @@ export const changePassword = asyncHandler(async (req, res) => {
 export const getAllUsers = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, role, department, search } = req.query;
 
-  const where = { isActive: true };
-  if (role) where.role = role;
-  if (department) where.department = department;
+  const query = { isActive: true };
+  if (role) query.role = role;
+  if (department) query.department = department;
   if (search) {
-    where.OR = [
-      { name: { contains: search, mode: 'insensitive' } },
-      { email: { contains: search, mode: 'insensitive' } },
-      { department: { contains: search, mode: 'insensitive' } }
+    query.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } },
+      { department: { $regex: search, $options: 'i' } }
     ];
   }
 
   const take = parseInt(limit);
   const skip = (parseInt(page) - 1) * take;
 
-  const users = await prisma.user.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    take,
-    skip
-  });
-
-  const total = await prisma.user.count({ where });
+  const [users, total] = await Promise.all([
+    User.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(take),
+    User.countDocuments(query)
+  ]);
 
   const usersWithoutPasswords = users.map(u => {
-    const { password: _, ...uNoPass } = u;
-    return uNoPass;
+    const uObj = u.toObject();
+    delete uObj.password;
+    return uObj;
   });
 
   res.json({
@@ -431,15 +389,14 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
 // get user by id
 export const getUserById = asyncHandler(async (req, res) => {
-  const user = await prisma.user.findUnique({
-    where: { id: req.params.id }
-  });
+  const user = await User.findById(req.params.id);
   
   if (!user) {
     throw new AppError('User not found', 404);
   }
 
-  const { password: _, ...userWithoutPassword } = user;
+  const userWithoutPassword = user.toObject();
+  delete userWithoutPassword.password;
 
   res.json({
     success: true,
@@ -453,20 +410,18 @@ export const getUserById = asyncHandler(async (req, res) => {
 export const updateUser = asyncHandler(async (req, res) => {
   const { name, email, role, department, yearOfStudy, phone, isActive } = req.body;
 
-  const updatedUser = await prisma.user.update({
-    where: { id: req.params.id },
-    data: {
-      name,
-      email: email?.toLowerCase(),
-      role,
-      department,
-      yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : undefined,
-      phone,
-      isActive
-    }
-  });
+  const updatedUser = await User.findByIdAndUpdate(req.params.id, {
+    name,
+    email: email?.toLowerCase(),
+    role,
+    department,
+    yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : undefined,
+    phone,
+    isActive
+  }, { new: true });
 
-  const { password: _, ...userWithoutPassword } = updatedUser;
+  const userWithoutPassword = updatedUser.toObject();
+  delete userWithoutPassword.password;
 
   res.json({
     success: true,
@@ -479,9 +434,7 @@ export const updateUser = asyncHandler(async (req, res) => {
 
 // delete user (Admin only!)
 export const deleteUser = asyncHandler(async (req, res) => {
-  await prisma.user.delete({
-    where: { id: req.params.id }
-  });
+  await User.findByIdAndDelete(req.params.id);
 
   res.json({
     success: true,
@@ -491,12 +444,10 @@ export const deleteUser = asyncHandler(async (req, res) => {
 
 // deactivate user (Admin only!)
 export const deactivateUser = asyncHandler(async (req, res) => {
-  const user = await prisma.user.update({
-    where: { id: req.params.id },
-    data: { isActive: false }
-  });
+  const user = await User.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
 
-  const { password: _, ...userWithoutPassword } = user;
+  const userWithoutPassword = user.toObject();
+  delete userWithoutPassword.password;
 
   res.json({
     success: true,

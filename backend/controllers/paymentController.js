@@ -1,4 +1,4 @@
-import prisma from '../utils/prisma.js';
+import Donation from '../models/Donation.js';
 import chapaService from '../services/chapaService.js';
 import { asyncHandler } from '../middleware/errorsHandler.js';
 import { AppError } from '../middleware/errorsHandler.js';
@@ -14,36 +14,30 @@ export const initializePayment = asyncHandler(async (req, res) => {
     throw new AppError('Amount must be at least 0.01', 400);
   }
 
-  const donation = await prisma.donation.create({
-    data: {
-      donorName: donor.name,
-      donorEmail: donor.email,
-      donorPhone: donor.phone || null,
-      amount: parseFloat(amount),
-      currency: currency || 'ETB',
-      purpose,
-      category,
-      notes,
-      paymentMethod: 'online_payment',
-      paymentStatus: 'pending',
-      ...(req.user?.id && { createdById: req.user.id })
-    }
+  const donation = await Donation.create({
+    donor: {
+      name: donor.name,
+      email: donor.email,
+      phone: donor.phone || null,
+      userId: req.user?._id
+    },
+    amount: parseFloat(amount),
+    currency: currency || 'ETB',
+    purpose,
+    category,
+    notes,
+    paymentMethod: 'online_payment',
+    paymentStatus: 'pending',
+    createdBy: req.user?._id
   });
 
-  const paymentResult = await chapaService.initializePayment({
-    _id: donation.id,
-    donor: { name: donation.donorName, email: donation.donorEmail, phone: donation.donorPhone },
-    amount: donation.amount,
-    currency: donation.currency,
-    purpose: donation.purpose,
-    category: donation.category
-  });
+  const paymentResult = await chapaService.initializePayment(donation);
 
   res.json({
     success: true,
     message: 'Payment initialized successfully',
     data: {
-      donationId: donation.id,
+      donationId: donation._id,
       checkoutUrl: paymentResult.checkoutUrl,
       transactionRef: paymentResult.transactionRef
     }
@@ -60,13 +54,13 @@ export const verifyPayment = asyncHandler(async (req, res) => {
 export const getPaymentStatus = asyncHandler(async (req, res) => {
   const { donationId } = req.params;
 
-  const donation = await prisma.donation.findUnique({ where: { id: donationId } });
+  const donation = await Donation.findById(donationId);
   if (!donation) throw new AppError('Donation not found', 404);
 
   res.json({
     success: true,
     data: {
-      donationId: donation.id,
+      donationId: donation._id,
       paymentStatus: donation.paymentStatus,
       transactionId: donation.transactionId,
       amount: donation.amount,

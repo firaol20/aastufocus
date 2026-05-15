@@ -2,7 +2,7 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import prisma from '../utils/prisma.js';
+import User from '../models/User.js';
 import config from '../config/environment.js';
 import bcrypt from 'bcryptjs';
 
@@ -16,9 +16,7 @@ passport.use(
     { usernameField: 'email', passwordField: 'password', session: false },
     async (email, password, done) => {
       try {
-        const user = await prisma.user.findUnique({
-          where: { email: email.toLowerCase() }
-        });
+        const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
 
         if (!user || !user.password) return done(null, false);
         if (user.lockUntil && user.lockUntil > new Date()) return done(null, false);
@@ -46,9 +44,7 @@ passport.use(
     },
     async (payload, done) => {
       try {
-        const user = await prisma.user.findUnique({
-          where: { id: payload.userId }
-        });
+        const user = await User.findById(payload.userId);
 
         if (!user) return done(null, false);
         if (!user.isActive) return done(null, false);
@@ -85,43 +81,31 @@ passport.use(
         const displayName = profile.displayName || 'Unknown User';
         const avatarUrl = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
 
-        let user = await prisma.user.findUnique({
-          where: { googleId: googleId }
-        });
+        let user = await User.findOne({ googleId: googleId });
 
         if (!user) {
-          user = await prisma.user.findUnique({
-            where: { email: email }
-          });
+          user = await User.findOne({ email: email });
 
           if (user) {
             // Link Google account to existing user
-            user = await prisma.user.update({
-              where: { id: user.id },
-              data: {
-                googleId,
-                avatar: user.avatar || avatarUrl,
-                lastLogin: new Date()
-              }
-            });
+            user = await User.findByIdAndUpdate(user.id, {
+              googleId,
+              avatar: user.avatar || avatarUrl,
+              lastLogin: new Date()
+            }, { new: true });
           } else {
             // Create new user
-            user = await prisma.user.create({
-              data: {
-                googleId,
-                email,
-                name: displayName,
-                avatar: avatarUrl,
-                lastLogin: new Date()
-              }
+            user = await User.create({
+              googleId,
+              email,
+              name: displayName,
+              avatar: avatarUrl,
+              lastLogin: new Date()
             });
           }
         } else {
           // Update lastLogin
-          user = await prisma.user.update({
-            where: { id: user.id },
-            data: { lastLogin: new Date() }
-          });
+          user = await User.findByIdAndUpdate(user.id, { lastLogin: new Date() }, { new: true });
         }
 
         done(null, user);
@@ -136,7 +120,7 @@ passport.use(
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await User.findById(id);
     done(null, user);
   } catch (err) {
     done(err, null);

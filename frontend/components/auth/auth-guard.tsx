@@ -36,7 +36,7 @@ export default function AuthGuard({ children, requireAdmin = false, redirectTo }
 
     // If user is admin and trying to access non-admin pages, redirect to admin dashboard
     if (isAdmin && !pathname.startsWith("/admin") && !pathname.startsWith("/login")) {
-      router.push("/admin")
+      router.push("/")
       return
     }
   }, [isLoading, isAuthenticated, isAdmin, requireAdmin, router, pathname, redirectTo])

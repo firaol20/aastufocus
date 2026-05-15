@@ -122,4 +122,13 @@ html {
   .banner-bg {
     @apply bg-[hsl(var(--banner-bg))];
   }
+
+  /* Hide scrollbar */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }

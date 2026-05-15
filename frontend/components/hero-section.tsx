@@ -246,8 +246,8 @@ export default function HeroSection({
   subheading = "Join AASTU FOCUS Fellowship in our journey of spiritual growth and community service",
   primaryButtonText = "Join Us",
   secondaryButtonText = "Learn More",
-  onPrimaryClick = () => {},
-  onSecondaryClick = () => {},
+  onPrimaryClick = () => { },
+  onSecondaryClick = () => { },
 }: HeroSectionProps) {
   const [currentArrangement, setCurrentArrangement] = useState(0);
 

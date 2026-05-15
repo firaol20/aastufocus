@@ -4,9 +4,16 @@ const contentSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, "Title is required"],
       trim: true,
       maxlength: [200, "Title cannot exceed 200 characters"],
+    },
+    key: {
+      type: String,
+      unique: true,
+      trim: true,
+    },
+    value: {
+      type: String,
     },
     slug: {
       type: String,
@@ -16,12 +23,9 @@ const contentSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: [true, "Content is required"],
-      minlength: [50, "Content must be at least 50 characters"],
     },
     excerpt: {
       type: String,
-      required: [true, "Excerpt is required"],
       maxlength: [300, "Excerpt cannot exceed 300 characters"],
     },
     type: {
@@ -56,7 +60,6 @@ const contentSchema = new mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Author is required"],
     },
     tags: [
       {
