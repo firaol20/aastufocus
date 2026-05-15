@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/lib/redux/authSlice";
@@ -7,7 +7,7 @@ import { ToastService } from "@/lib/services/toastService";
 import axiosClient from "@/lib/api/axiosClient";
 import { apiRoutes } from "@/lib/api";
 
-export default function AuthCallback() {
+function AuthCallbackInner() {
   const searchParams = useSearchParams();
   const authStatus = searchParams.get("auth");
   const router = useRouter();
@@ -46,4 +46,12 @@ export default function AuthCallback() {
   }, [authStatus, dispatch, router]);
 
   return <p className="text-center mt-20">Processing login...</p>;
+}
+
+export default function AuthCallback() {
+  return (
+    <Suspense fallback={<p className="text-center mt-20">Loading...</p>}>
+      <AuthCallbackInner />
+    </Suspense>
+  );
 }
