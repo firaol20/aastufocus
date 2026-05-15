@@ -144,12 +144,12 @@ export const useRouteProtection = (config: RouteConfig) => {
 
       // Show appropriate error message
       if (!isAuthenticated) {
-        ErrorHandler.showWarningMessage(
+        ErrorHandler.showWarningToast(
           "Authentication Required",
           "Please log in to access this page."
         );
       } else {
-        ErrorHandler.showWarningMessage(
+        ErrorHandler.showWarningToast(
           "Access Denied",
           "You do not have permission to access this page."
         );
