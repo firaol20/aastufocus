@@ -22,7 +22,7 @@ export default function TeamsPage() {
       <section className="relative h-[400px] md:h-[500px] w-full flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/hero-section/hero-4.jpg"
+            src="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-4.jpg"
             alt="Teams Background"
             fill
             className="object-cover"
@@ -113,7 +113,7 @@ export default function TeamsPage() {
                   "Commitment to regular practice and spiritual growth",
                   "Ability to work well in a team setting",
                 ]}
-                imageSrc="/teams/eleos_team_leaders.jpg"
+                imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/eleos_team_leaders.jpg"
                 members={EleosTeamLeaders}
               />
             </TabsContent>
@@ -134,7 +134,7 @@ export default function TeamsPage() {
                   "Heart for the community and campus",
                   "Ability to mobilize and inspire others to serve",
                 ]}
-                imageSrc="/teams/actionandprayer_team_leaders.jpg"
+                imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/actionandprayer_team_leaders.jpg"
                 members={ActionandPrayerTeamLeaders}
               />
             </TabsContent>
@@ -158,7 +158,7 @@ export default function TeamsPage() {
                   "Commitment to personal Bible study",
                   "Heart for helping others grow spiritually",
                 ]}
-                imageSrc="/teams/bsc_team_leaders.jpg"
+                imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/bsc_team_leaders.jpg"
                 members={BibleStudyCoordinator}
               />
             </TabsContent>
@@ -179,7 +179,7 @@ export default function TeamsPage() {
                   "Must have a teachable spirit",
                   "Must be willing to learn and grow spiritually",
                 ]}
-                imageSrc="/teams/tumbi_team_leaders.jpg"
+                imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/tumbi_team_leaders.jpg"
                 members={TumbiTeamLeaders}
               />
             </TabsContent>
@@ -200,7 +200,7 @@ export default function TeamsPage() {
                   "Good communication skills",
                   "Reliability and commitment to serving",
                 ]}
-                imageSrc="/teams/ebenims_team_leaders.jpg"
+                imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/ebenims_team_leaders.jpg"
                 members={EbenimsTeamLeader}
               />
             </TabsContent>
@@ -221,7 +221,7 @@ export default function TeamsPage() {
                   "Reliability and commitment",
                   "Understanding of effective communication",
                 ]}
-                imageSrc="/teams/salem_meadia_leaders.png"
+                imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/salem_meadia_leaders.png"
                 members={SalemMediaLeaders}
               />
             </TabsContent>
@@ -300,7 +300,7 @@ export default function TeamsPage() {
             </div>
             <div className="relative h-[500px] rounded-lg overflow-hidden">
               <Image
-                src="/teams/join_our_teams.jpg"
+                src="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/join_our_teams.jpg"
                 alt="Team members serving together"
                 fill
                 className="object-cover"
@@ -333,7 +333,7 @@ export default function TeamsPage() {
                 <div className="flex items-center">
                   <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
                     <Image
-                      src="/worship.jpg"
+                      src="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg"
                       alt="Daniel H."
                       width={48}
                       height={48}
@@ -361,7 +361,7 @@ export default function TeamsPage() {
                 <div className="flex items-center">
                   <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
                     <Image
-                      src="/worship.jpg"
+                      src="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg"
                       alt="Bethel T."
                       width={48}
                       height={48}
@@ -389,7 +389,7 @@ export default function TeamsPage() {
                 <div className="flex items-center">
                   <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
                     <Image
-                      src="/worship.jpg"
+                      src="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg"
                       alt="Meron A."
                       width={48}
                       height={48}
@@ -481,7 +481,7 @@ function TeamSection({
         <GalleryLightbox images={[imageSrc]} initialIndex={0}>
           <div className="relative h-[300px] md:h-[400px] rounded-lg overflow-hidden cursor-pointer group">
             <Image
-              src={imageSrc || "/worship.jpg"}
+              src={imageSrc || "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg"}
               alt={name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -500,10 +500,10 @@ function TeamSection({
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {members.map((member, index) => (
             <div key={index} className="text-center">
-              <GalleryLightbox images={members.map(m => m.avatar || "/worship.jpg")} initialIndex={index}>
+              <GalleryLightbox images={members.map(m => m.avatar || "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg")} initialIndex={index}>
                 <div className="relative w-20 h-20 mx-auto rounded-full overflow-hidden mb-2 cursor-pointer group ring-2 ring-transparent hover:ring-primary transition-all">
                   <Image
-                    src={member.avatar || "/worship.jpg"}
+                    src={member.avatar || "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg"}
                     alt={member.name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -522,54 +522,54 @@ function TeamSection({
 
 // Sample data
 const EleosTeamLeaders = [
-  { name: "Mootii", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Ayantu", role: "Ex Leader", avatar: "/worship.jpg" },
-  { name: "Abdi", role: "Ex Leader", avatar: "/worship.jpg" },
-  { name: "Kena", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Sanyi", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Mootii", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Ayantu", role: "Ex Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Abdi", role: "Ex Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Kena", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Sanyi", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
 ];
 
 const ActionandPrayerTeamLeaders = [
-  { name: "Solomon", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Idae", role: "Ex Leader", avatar: "/worship.jpg" },
-  { name: "Olman", role: "Ex Leader", avatar: "/worship.jpg" },
-  { name: "Ebise", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Tilahun", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Sarah", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Solomon", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Idae", role: "Ex Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Olman", role: "Ex Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Ebise", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Tilahun", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Sarah", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
 ];
 
 const BibleStudyCoordinator = [
-  { name: "Eyosias", role: "Ex Leader", avatar: "/worship.jpg" },
-  { name: "Bayisa", role: "Ex Leader", avatar: "/worship.jpg" },
-  { name: "Hundee", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Elias", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Ifaa", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Eyosias", role: "Ex Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Bayisa", role: "Ex Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Hundee", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Elias", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Ifaa", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
 ];
 
 const TumbiTeamLeaders = [
-  { name: "Naol", role: "Leader", avatar: "/worship.jpg" },
-  { name: "Eyosias", role: "Leader", avatar: "/worship.jpg" },
-  { name: "Ayantu", role: "Leader", avatar: "/worship.jpg" },
-  { name: "Elsabet", role: "Leader", avatar: "/worship.jpg" },
-  { name: "Ebise", role: "Leader", avatar: "/worship.jpg" },
+  { name: "Naol", role: "Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Eyosias", role: "Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Ayantu", role: "Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Elsabet", role: "Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Ebise", role: "Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
 ];
 
 const EbenimsTeamLeader = [
-  { name: "Gabisaa", role: "Ex Leader", avatar: "/worship.jpg" },
-  { name: "Sisiyo", role: "Ex Leader", avatar: "/worship.jpg" },
-  { name: "Sanyi", role: "Ex Leader", avatar: "/worship.jpg" },
-  { name: "Tamasgen", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Beka", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Gabisaa", role: "Ex Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Sisiyo", role: "Ex Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Sanyi", role: "Ex Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Tamasgen", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Beka", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
   {
     name: "Eba",
     role: "Current Leader",
-    avatar: "/worship.jpg",
+    avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg",
   },
 ];
 
 const SalemMediaLeaders = [
-  { name: "Kaleb", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Roba", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Elias", role: "Current Leader", avatar: "/worship.jpg" },
-  { name: "Bornabek", role: "Current Leader", avatar: "/worship.jpg" },
+  { name: "Kaleb", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Roba", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Elias", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
+  { name: "Bornabek", role: "Current Leader", avatar: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg" },
 ];

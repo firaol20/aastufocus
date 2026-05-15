@@ -19,7 +19,7 @@ export default function AboutPage() {
       <section className="relative h-[400px] md:h-[500px] w-full flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/hero-section/hero-2.jpg"
+            src="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-2.jpg"
             alt="About Us Background"
             fill
             className="object-cover"
@@ -81,7 +81,7 @@ export default function AboutPage() {
             <FadeIn direction="left">
               <div className="relative h-[400px] rounded-lg overflow-hidden">
                 <Image
-                  src="/events.jpg"
+                  src="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/events.png"
                   alt="Fellowship gathering"
                   fill
                   className="object-cover"
@@ -327,7 +327,7 @@ export default function AboutPage() {
                       name="Abdi Takele"
                       role="Ex Leader"
                       bio="God made Him who had no sin to be sin for us, so that in Him we might become the righteousness of God.— 2 Corinthians 5:21."
-                      imageSrc="/Teams/Hopa.jpg"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/Hopa.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
@@ -335,7 +335,7 @@ export default function AboutPage() {
                       name="Hayu Rabira"
                       role="Ex Leader"
                       bio="“Trust in the Lord with all your heart,and lean not on your own understanding;in all your ways acknowledge Him,and He shall direct your paths.” — Proverbs 3:5–6"
-                      imageSrc="/Teams/hayu.jpg"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/hayu.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
@@ -343,7 +343,7 @@ export default function AboutPage() {
                       name="Naol Wandimu"
                       role="Ex Leader"
                       bio="For God so loved the world that He gave His only begotten Son, that whoever believes in Him should not perish but have everlasting life.”— John 3:16"
-                      imageSrc="/Teams/naol.png"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/naol.png"
                     />
                   </StaggerItem>
                   <StaggerItem>
@@ -351,7 +351,7 @@ export default function AboutPage() {
                       name="Moti Tesfaye"
                       role="Main Leader"
                       bio="“Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.”— Joshua 1:9"
-                      imageSrc="/Teams/kingo.png"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/kingo.png"
                     />
                   </StaggerItem>
                   <StaggerItem>
@@ -359,7 +359,7 @@ export default function AboutPage() {
                       name="Firaol Bashada"
                       role="Main Leader"
                       bio="“Who among the gods is like You, Lord? Who is like You—majestic in holiness, awesome in glory, working wonders?” — Exodus 15:11"
-                      imageSrc="/Teams/fira.png"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/fira.png"
                     />
                   </StaggerItem>
                   <StaggerItem>
@@ -367,7 +367,7 @@ export default function AboutPage() {
                       name="Amanuel legese"
                       role="Main Leader"
                       bio="“For in the gospel the righteousness of God is revealed — a righteousness that is by faith from first to last.”— Romans 1:17"
-                      imageSrc="/Teams/Amo.jpg"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/Amo.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
@@ -375,7 +375,7 @@ export default function AboutPage() {
                       name="Gifti Tesfaye"
                       role="Main Leader"
                       bio="“Holy, holy, holy is the Lord Almighty;the whole earth is full of His glory.”— Isaiah 6:3"
-                      imageSrc="/Teams/gifti.jpg"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/gifti.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
@@ -383,7 +383,7 @@ export default function AboutPage() {
                       name="Elsabet Birhanu"
                       role="Main Leader"
                       bio="God made Him who had no sin to be sin for us, so that in Him we might become the righteousness of God.”— 2 Corinthians 5:21"
-                      imageSrc="/Teams/Elsabet.jpg"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/Elsabet.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
@@ -391,7 +391,7 @@ export default function AboutPage() {
                       name="Yosef Shibiru"
                       role="Main Leader"
                       bio="“Blessed is the one who trusts in the Lord, whose confidence is in Him.”— Jeremiah 17:7"
-                      imageSrc="/Teams/yosef.jpg"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/yosef.jpg"
                     />
                   </StaggerItem>
                   <StaggerItem>
@@ -399,7 +399,7 @@ export default function AboutPage() {
                       name="Hunduma Alamayo"
                       role="Main Leader"
                       bio="“There is no one holy like the Lord; there is no one besides You.”— 1 Samuel 2:2"
-                      imageSrc="/Teams/Hunduma.jpg"
+                      imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Teams/Hunduma.jpg"
                     />
                   </StaggerItem>
                 </div>

@@ -77,7 +77,7 @@ export default function Home() {
                   date="Every Wednesday, 6:00 PM"
                   location="Main Campus, Room 201"
                   description="Join us as we study the Book of John and discover what it means to follow Jesus."
-                  imageSrc="/bible-study.png"
+                  imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/bible-study.png"
                 />
               </StaggerItem>
               <StaggerItem>
@@ -86,7 +86,7 @@ export default function Home() {
                   date="March 25, 7:00 PM"
                   location="Kilinto Church"
                   description="A night of praise and worship to connect with God and each other."
-                  imageSrc="/worship-night.jpg"
+                  imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship-night.jpg"
                 />
               </StaggerItem>
               <StaggerItem>
@@ -95,7 +95,7 @@ export default function Home() {
                   date="April 2, 9:00 AM"
                   location="Local Community Center"
                   description="Serving our community through various activities and sharing God's love."
-                  imageSrc="/break-mission.jpg"
+                  imageSrc="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/break-mission.jpg"
                 />
               </StaggerItem>
             </div>

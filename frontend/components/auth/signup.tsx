@@ -131,7 +131,7 @@ export default function SignUpForm() {
         <div className="absolute inset-2 ">
           <div className="absolute inset-0 rounded-[10px] overflow-hidden ">
             <Image
-              src="/hero-image.jpg"
+              src="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/hero-image.jpg"
               alt="Cozy living room with modern furniture"
               fill
               className="object-cover"

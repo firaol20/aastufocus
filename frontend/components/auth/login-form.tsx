@@ -206,7 +206,7 @@ export default function LoginForm() {
         <div className="absolute inset-2">
           <div className="absolute inset-0 rounded-[10px] overflow-hidden">
             <Image
-              src="/hero-image.jpg"
+              src="https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/hero-image.jpg"
               alt="Hero Image"
               fill
               priority

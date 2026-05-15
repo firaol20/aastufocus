@@ -261,31 +261,22 @@ export default function HeroSection({
 
   const currentGrid = gridArrangements[currentArrangement];
   const images = [
-    {
-      src: "/hero-section/hero-1.jpg",
-      alt: "Community members celebrating together with raised hands",
-    },
-    {
-      src: "/hero-section/hero-2.jpg",
-      alt: "Large group photo of fellowship members",
-    },
-    {
-      src: "/hero-section/hero-3.jpg",
-      alt: "People in a unity circle showing fellowship",
-    },
-    { src: "/hero-section/hero-4.jpg", alt: "Fellowship members in worship" },
-    { src: "/hero-section/hero-5.jpg", alt: "Group prayer and meditation" },
-    { src: "/hero-section/hero-6.jpg", alt: "Community service activities" },
-    { src: "/hero-section/hero-7.jpg", alt: "Bible study and learning" },
-    { src: "/hero-section/hero-8.jpg", alt: "Youth fellowship gathering" },
-    { src: "/hero-section/hero-9.jpg", alt: "Leadership team meeting" },
-    { src: "/hero-section/hero-10.jpg", alt: "Outdoor fellowship event" },
-    { src: "/hero-section/hero-11.jpg", alt: "Fellowship celebration" },
-    { src: "/hero-section/hero-12.jpg", alt: "Community building" },
-    { src: "/hero-section/hero-13.jpg", alt: "Spiritual growth" },
-    { src: "/hero-section/hero-14.jpg", alt: "Fellowship activities" },
-    { src: "/hero-section/hero-15.jpg", alt: "Community engagement" },
-    { src: "/hero-section/hero-16.jpg", alt: "Fellowship events" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-1.jpg", alt: "Community members celebrating together with raised hands" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-2.jpg", alt: "Large group photo of fellowship members" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-3.jpg", alt: "People in a unity circle showing fellowship" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-4.jpg", alt: "Fellowship members in worship" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-5.jpg", alt: "Group prayer and meditation" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-6.jpg", alt: "Community service activities" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-7.jpg", alt: "Bible study and learning" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-8.jpg", alt: "Youth fellowship gathering" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-9.jpg", alt: "Leadership team meeting" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-10.jpg", alt: "Outdoor fellowship event" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-11.jpg", alt: "Fellowship celebration" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-12.jpg", alt: "Community building" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-13.jpg", alt: "Spiritual growth" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-14.jpg", alt: "Fellowship activities" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-15.jpg", alt: "Community engagement" },
+    { src: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-16.jpg", alt: "Fellowship events" },
   ];
 
   return (

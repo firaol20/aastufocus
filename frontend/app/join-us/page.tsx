@@ -14,8 +14,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/hooks/use-toast"
 import { CheckCircle2 } from "lucide-react"
-import worship from "@/public/worship.jpg"
 import { Banner } from "@/components/banner"
+
+const WORSHIP_IMG = "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Misc/worship.jpg";
 
 export default function JoinUsPage() {
   const [formStep, setFormStep] = useState(0)
@@ -145,7 +146,7 @@ export default function JoinUsPage() {
               </div>
               <div className="relative h-[500px] rounded-lg overflow-hidden">
                 <Image
-                  src={worship}
+                  src={WORSHIP_IMG}
                   alt="Fellowship gathering"
                   fill
                   className="object-cover"
