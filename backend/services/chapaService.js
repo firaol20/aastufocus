@@ -20,7 +20,7 @@ class ChapaService {
         customizations: {
           title: "Donation Payment",
           description: `Donation for ${donation.purpose}`,
-          logo: "https://yourdomain.com/logo.png"
+          logo: "https://aastufocus.com/logo.png"
         }
       };
 

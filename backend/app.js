@@ -60,7 +60,11 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? ["https://yourdomain.com"]
+        ? [
+            process.env.CLIENT_URL,
+            "https://aastufocus.com",
+            "https://www.aastufocus.com",
+          ].filter(Boolean)
         : ["http://localhost:3000"],
     credentials: true,
   }),
