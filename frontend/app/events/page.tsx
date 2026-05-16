@@ -29,19 +29,19 @@ import { Banner } from "@/components/banner";
 
 const heroSlides = [
   {
-    image: "/hero-section/hero-4.jpg",
+    image: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-4.jpg",
     title: "WORSHIP \n NIGHTS",
     description:
       "Join us for an unforgettable night of worship, praise, and spiritual reflection. Let's come together to lift our voices and experience the presence of God.",
   },
   {
-    image: "/hero-section/hero-2.jpg",
+    image: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-2.jpg",
     title: "BIBLE STUDY \n FELLOWSHIP",
     description:
       "Dive deep into the Word of God together. Grow in understanding, ask questions, and build lasting friendships in our weekly Bible study groups.",
   },
   {
-    image: "/hero-section/hero-3.jpg",
+    image: "https://res.cloudinary.com/dllg3vnae/image/upload/AASTU_Hero/hero-3.jpg",
     title: "COMMUNITY \n OUTREACH",
     description:
       "Be the hands and feet of Jesus. Join our latest mission trips and community service events to spread love and hope in our city.",

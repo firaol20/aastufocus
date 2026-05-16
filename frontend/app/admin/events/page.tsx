@@ -71,7 +71,7 @@ export default function EventsPage() {
     registrations: event.currentAttendees,
     maxAttendees: event.maxAttendees || 0,
     image: event.image
-      ? `${"http://localhost:5002"}${event.image}`
+      ? `${process.env.NEXT_PUBLIC_API?.replace("/api", "") || ""}${event.image}`
       : "/placeholder.svg",
   }));
 
